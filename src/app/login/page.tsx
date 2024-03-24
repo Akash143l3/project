@@ -24,10 +24,11 @@ import { Input } from "@/components/ui/input"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import Link from "next/link"
+import axios from "axios"
 
 const formSchema = z.object({
     username: z.string().min(2, { message: "Enter a vaild username.", }),
-    password: z.string()
+    user_password: z.string()
         .length(8, "Enter a vaild password."),
 })
 
@@ -36,13 +37,59 @@ export default function LoginPage() {
         resolver: zodResolver(formSchema),
         defaultValues: {
             username: "",
-            password: "",
+            user_password: "",
         },
     })
-    function onSubmit(values: z.infer<typeof formSchema>) {
+    function handleLogin(values: z.infer<typeof formSchema>) {
+        axios
+            .post('http://127.0.0.1:5000/login', values)
+            .then((response) => {
+                console.log(response.data);
+                alert(response.data.message)
+                // Handle successful login
+            })
+            .catch((error) => {
+                console.error(error);
+                alert(error.response.data.error)
+                // Handle login error
+            });
+    }
 
-        // ✅ This will be type-safe and validated.
-        console.log(values)
+
+
+    function handleResetPassword(username: any, newPassword: any, confirmPassword: any) {
+        if (newPassword !== confirmPassword) {
+            // Handle password mismatch error
+            return alert("confirm password is not same");
+        }
+
+        const data = {
+            username,
+            new_password: newPassword,
+        };
+
+        axios
+            .put('http://127.0.0.1:5000/reset-password', data)
+            .then((response) => {
+                // Handle successful password reset
+                alert(response.data.message);
+            })
+            .catch((error) => {
+                if (error.response) {
+                    // The request was made and the server responded with a status code
+                    // that falls out of the range of 2xx
+                    alert(error.response.data.error); // Print the error message from the server
+                    console.error(error.response.status); // Print the status code
+                    console.error(error.response.headers); // Print the headers
+                } else if (error.request) {
+                    // The request was made but no response was received
+                    console.error(error.request);
+                } else {
+                    // Something happened in setting up the request that triggered an error
+                    console.error('Error', error.message);
+                }
+                // Handle reset password error
+            });
     }
 
 
@@ -50,7 +97,7 @@ export default function LoginPage() {
         <div className="flex justify-center p-10" >
             <div className=" w-1/3 p-10 rounded-2xl  border">
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                    <form onSubmit={form.handleSubmit(handleLogin)} className="space-y-8">
                         <h1 className="flex justify-center text-2xl font-semibold">Login</h1>
 
                         {/* User Name */}
@@ -76,7 +123,7 @@ export default function LoginPage() {
 
                         <FormField
                             control={form.control}
-                            name="password"
+                            name="user_password"
                             render={({ field }) => (
                                 <FormItem>
                                     <div className="flex space-x-4">
@@ -97,51 +144,50 @@ export default function LoginPage() {
                                 <span className="pl-10 text-blue-600 text-sm">
                                     <Dialog>
                                         <DialogTrigger asChild>
-                                           <button> Forget Password</button>
+                                            <button>Forget Password</button>
                                         </DialogTrigger>
                                         <DialogContent className="sm:max-w-[425px]">
                                             <DialogHeader>
                                                 <DialogTitle>Reset Password</DialogTitle>
-                                                <DialogDescription>
-                                                   
-                                                </DialogDescription>
+                                                <DialogDescription></DialogDescription>
                                             </DialogHeader>
                                             <div className="grid gap-4 py-4">
                                                 <div className="grid grid-cols-3 items-center gap-4">
-                                                    <Label htmlFor="name" className="text-right ">
-                                                     User Name
+                                                    <Label htmlFor="name" className="text-right">
+                                                        User Name
                                                     </Label>
-                                                    <Input
-                                                        id="username"
-                                                        placeholder="Username"
-                                                        className="col-span-2"
-                                                    />
+                                                    <Input id="username" placeholder="Username" className="col-span-2" />
                                                 </div>
                                                 <div className="grid grid-cols-3 items-center gap-4">
-                                                    <Label htmlFor="password" className="text-right ">
+                                                    <Label htmlFor="newPassword" className="text-right">
                                                         New Password
                                                     </Label>
-                                                    <Input
-                                                        id="password"
-                                                        placeholder="password"
-                                                        className="col-span-2"
-                                                        type="password"
-                                                    />
+                                                    <Input id="newPassword" placeholder="New Password" className="col-span-2" type="password" />
                                                 </div>
                                                 <div className="grid grid-cols-3 items-center gap-4">
-                                                    <Label htmlFor="password" className="text-right w-max ">
-                                                        confirm Password
+                                                    <Label htmlFor="confirmPassword" className="text-right w-max">
+                                                        Confirm Password
                                                     </Label>
-                                                    <Input
-                                                        id="password"
-                                                        placeholder="confirm Password"
-                                                        className="col-span-2"
-                                                        type="password"
-                                                    />
+                                                    <Input id="confirmPassword" placeholder="Confirm Password" className="col-span-2" type="password" />
                                                 </div>
                                             </div>
                                             <DialogFooter>
-                                                <Button type="submit">Save changes</Button>
+                                                <Button
+                                                    type="submit"
+                                                    onClick={() => {
+                                                        const usernameInput = document.getElementById('username') as HTMLInputElement;
+                                                        const newPasswordInput = document.getElementById('newPassword') as HTMLInputElement;
+                                                        const confirmPasswordInput = document.getElementById('confirmPassword') as HTMLInputElement;
+
+                                                        const username = usernameInput.value;
+                                                        const newPassword = newPasswordInput.value;
+                                                        const confirmPassword = confirmPasswordInput.value;
+
+                                                        handleResetPassword(username, newPassword, confirmPassword);
+                                                    }}
+                                                >
+                                                    Save changes
+                                                </Button>
                                             </DialogFooter>
                                         </DialogContent>
                                     </Dialog>

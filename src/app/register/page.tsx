@@ -1,7 +1,7 @@
 "use client"
 
-import { string, z } from "zod"
-
+import {  z } from "zod"
+import axios from 'axios';
 import { Button } from "@/components/ui/button"
 import {
     Form,
@@ -15,54 +15,80 @@ import { Input } from "@/components/ui/input"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import Link from "next/link"
+import { useToast } from "@/components/ui/use-toast"
+
 
 const formSchema = z.object({
-    fullname: z.string().min(3, { message: "Name must be more than two characters" }),
+    full_name: z.string().min(3, { message: "Name must be more than two characters" }),
     username: z.string().min(2, { message: "Username must be at least 2 characters.", }),
-    password: z.string()
+    user_password: z.string()
         .length(8, "Password should contain exactly 8 characters."),
-    confirmPassword: z.string()
-        .length(8, "Password should contain exactly 8 characters."),
-    email: z.string().email("Invalid Email Address"),
-    phone: z.string().refine(value => /^\d{10}$/.test(value), {
+    
+    email_address: z.string().email("Invalid Email Address"),
+    phone_number: z.string().refine(value => /^\d{10}$/.test(value), {
         message: "Enter a valid 10-digit phone number",
     }),
-    clientId: z.number(),
-    apiKey: z.any(), //api key is not a number so we need to set it as any
-    apiSecret: z.any()
+    client_id: z.string(),
+    api_key: z.string(), //api key is not a number so we need to set it as any
+    api_secret: z.string()
 })
 
+
+
 export default function RegisterPage() {
+    const { toast }=useToast()
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            fullname: "",
+            full_name: "",
             username: "",
-            password: "",
-            email: "",
-            apiKey: '',
-            apiSecret: ''
+            user_password: "",
+            email_address: "",
+            phone_number:"",
+            client_id:"",
+            api_key: "",
+            api_secret: ""
 
         },
     })
-    function onSubmit(values: z.infer<typeof formSchema>) {
-
-        // ✅ This will be type-safe and validated.
-        console.log(values)
-    }
+    function handleRegistration(values: z.infer<typeof formSchema>) {
+        axios
+          .post('http://127.0.0.1:5000/register', values)
+          .then((response) => {
+           
+            alert(response.data.message)
+            // Handle successful registration
+          })
+          .catch((error) => {
+            if (error.response) {
+              // The request was made and the server responded with a status code
+              // that falls out of the range of 2xx
+            alert(error.response.data.error); // Print the error message from the server
+              console.error(error.response.status); // Print the status code
+              console.error(error.response.headers); // Print the headers
+            } else if (error.request) {
+              // The request was made but no response was received
+              console.error(error.request);
+            } else {
+              // Something happened in setting up the request that triggered an error
+              console.error('Error', error.message);
+            }
+            // Handle registration error
+          });
+      }
 
 
     return (
         <div className="flex justify-center p-10" >
             <div className=" w-1/2 p-10 rounded-2xl  border">
                 <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                    <form onSubmit={form.handleSubmit(handleRegistration)} className="space-y-8">
                         <h1 className="flex justify-center text-2xl font-semibold">Register</h1>
                         {/* Full Name */}
 
                         <FormField
                             control={form.control}
-                            name="fullname"
+                            name="full_name"
                             render={({ field }) => (
                                 <FormItem>
                                     <div className="flex space-x-4">
@@ -100,7 +126,7 @@ export default function RegisterPage() {
 
                         <FormField
                             control={form.control}
-                            name="password"
+                            name="user_password"
                             render={({ field }) => (
                                 <FormItem>
                                     <div className="flex space-x-4">
@@ -117,27 +143,13 @@ export default function RegisterPage() {
 
                         {/* Confirm Password */}
 
-                        <FormField
-                            control={form.control}
-                            name="confirmPassword"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <div className="flex space-x-4">
-                                        <FormLabel className="pt-3 w-1/2">Confirm Password</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="confirm password" {...field} type="password" />
-                                        </FormControl>
-                                    </div>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+                        
 
                         {/* Email*/}
 
                         <FormField
                             control={form.control}
-                            name="email"
+                            name="email_address"
                             render={({ field }) => (
                                 <FormItem>
                                     <div className="flex space-x-4">
@@ -155,7 +167,7 @@ export default function RegisterPage() {
 
                         <FormField
                             control={form.control}
-                            name="phone"
+                            name="phone_number"
                             render={({ field }) => (
                                 <FormItem>
                                     <div className="flex space-x-4">
@@ -181,7 +193,7 @@ export default function RegisterPage() {
 
                         <FormField
                             control={form.control}
-                            name="clientId"
+                            name="client_id"
                             render={({ field }) => (
                                 <FormItem>
                                     <div className="flex space-x-4">
@@ -200,7 +212,7 @@ export default function RegisterPage() {
 
                         <FormField
                             control={form.control}
-                            name="apiKey"
+                            name="api_key"
                             render={({ field }) => (
                                 <FormItem>
                                     <div className="flex space-x-4">
@@ -219,7 +231,7 @@ export default function RegisterPage() {
 
                         <FormField
                             control={form.control}
-                            name="apiSecret"
+                            name="api_secret"
                             render={({ field }) => (
                                 <FormItem>
                                     <div className="flex space-x-4">
