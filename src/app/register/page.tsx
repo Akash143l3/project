@@ -1,6 +1,6 @@
 "use client"
 
-import {  z } from "zod"
+import { z } from "zod"
 import axios from 'axios';
 import { Button } from "@/components/ui/button"
 import {
@@ -18,12 +18,13 @@ import Link from "next/link"
 import { useToast } from "@/components/ui/use-toast"
 
 
-const formSchema = z.object({
+const formSchema: any = z.object({
     full_name: z.string().min(3, { message: "Name must be more than two characters" }),
     username: z.string().min(2, { message: "Username must be at least 2 characters.", }),
     user_password: z.string()
-        .length(8, "Password should contain exactly 8 characters."),
-    
+        .min(8, "Password should contain more than 8 characters."),
+    confirm_password: z.string()
+        .min(8, "Password should contain more than 8 characters."),
     email_address: z.string().email("Invalid Email Address"),
     phone_number: z.string().refine(value => /^\d{10}$/.test(value), {
         message: "Enter a valid 10-digit phone number",
@@ -36,46 +37,50 @@ const formSchema = z.object({
 
 
 export default function RegisterPage() {
-    const { toast }=useToast()
+    const { toast } = useToast()
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             full_name: "",
             username: "",
             user_password: "",
+            confirm_password: "",
             email_address: "",
-            phone_number:"",
-            client_id:"",
+            phone_number: "",
+            client_id: "",
             api_key: "",
             api_secret: ""
 
         },
+
     })
     function handleRegistration(values: z.infer<typeof formSchema>) {
-        axios
-          .post('http://127.0.0.1:5000/register', values)
-          .then((response) => {
-           
-            alert(response.data.message)
-            // Handle successful registration
-          })
-          .catch((error) => {
-            if (error.response) {
-              // The request was made and the server responded with a status code
-              // that falls out of the range of 2xx
-            alert(error.response.data.error); // Print the error message from the server
-              console.error(error.response.status); // Print the status code
-              console.error(error.response.headers); // Print the headers
-            } else if (error.request) {
-              // The request was made but no response was received
-              console.error(error.request);
-            } else {
-              // Something happened in setting up the request that triggered an error
-              console.error('Error', error.message);
-            }
-            // Handle registration error
-          });
-      }
+
+            axios
+                .post('http://127.0.0.1:5000/register', values)
+                .then((response) => {
+
+                    toast({ description: response.data.message })
+                    // Handle successful registration
+                })
+                .catch((error) => {
+                    if (error.response) {
+                        // The request was made and the server responded with a status code
+                        // that falls out of the range of 2xx
+                        toast({ description: error.response.data.error })// Print the error message from the server
+                        console.error(error.response.status); // Print the status code
+                        console.error(error.response.headers); // Print the headers
+                    } else if (error.request) {
+                        // The request was made but no response was received
+                        console.error(error.request);
+                    } else {
+                        // Something happened in setting up the request that triggered an error
+                        console.error('Error', error.message);
+                    }
+                    // Handle registration error
+                });
+        } 
+    
 
 
     return (
@@ -143,7 +148,21 @@ export default function RegisterPage() {
 
                         {/* Confirm Password */}
 
-                        
+                        <FormField
+                            control={form.control}
+                            name="confirm_password"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <div className="flex space-x-4">
+                                        <FormLabel className="pt-3 w-1/2">Confirm Password</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="Confirm Password" {...field} type="password" />
+                                        </FormControl>
+                                    </div>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
 
                         {/* Email*/}
 
@@ -173,11 +192,11 @@ export default function RegisterPage() {
                                     <div className="flex space-x-4">
                                         <FormLabel className="pt-3 w-1/2">Phone Number</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="Phone Number" {...field} type="tel" pattern="[0-9]*" 
-                                            onChange={(e) => {
-                                                const value = e.target.value.replace(/\D/g, ''); // Remove non-numeric characters
-                                                field.onChange(value);
-                                            }} />
+                                            <Input placeholder="Phone Number" {...field} type="tel" pattern="[0-9]*"
+                                                onChange={(e) => {
+                                                    const value = e.target.value.replace(/\D/g, ''); // Remove non-numeric characters
+                                                    field.onChange(value);
+                                                }} />
                                         </FormControl>
                                     </div>
                                     <FormMessage />
@@ -218,7 +237,7 @@ export default function RegisterPage() {
                                     <div className="flex space-x-4">
                                         <FormLabel className="pt-3 w-1/2">API Key</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="API Key" {...field} required/>
+                                            <Input placeholder="API Key" {...field} required />
                                         </FormControl>
                                     </div>
                                     <FormMessage />

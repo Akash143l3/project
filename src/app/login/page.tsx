@@ -25,14 +25,17 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import Link from "next/link"
 import axios from "axios"
+import { useToast } from "@/components/ui/use-toast"
+
 
 const formSchema = z.object({
     username: z.string().min(2, { message: "Enter a vaild username.", }),
     user_password: z.string()
-        .length(8, "Enter a vaild password."),
+        .min(8, "Enter a vaild password."),
 })
 
 export default function LoginPage() {
+    const { toast } = useToast();
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -45,12 +48,12 @@ export default function LoginPage() {
             .post('http://127.0.0.1:5000/login', values)
             .then((response) => {
                 console.log(response.data);
-                alert(response.data.message)
+                toast({ description: response.data.message })
                 // Handle successful login
             })
             .catch((error) => {
                 console.error(error);
-                alert(error.response.data.error)
+                toast({ description: error.response.data.error })
                 // Handle login error
             });
     }
@@ -60,8 +63,9 @@ export default function LoginPage() {
     function handleResetPassword(username: any, newPassword: any, confirmPassword: any) {
         if (newPassword !== confirmPassword) {
             // Handle password mismatch error
-            return alert("confirm password is not same");
+            return toast({ description: "confirm password is not same" });
         }
+       
 
         const data = {
             username,
@@ -72,13 +76,13 @@ export default function LoginPage() {
             .put('http://127.0.0.1:5000/reset-password', data)
             .then((response) => {
                 // Handle successful password reset
-                alert(response.data.message);
+                toast({ description: response.data.message });
             })
             .catch((error) => {
                 if (error.response) {
                     // The request was made and the server responded with a status code
                     // that falls out of the range of 2xx
-                    alert(error.response.data.error); // Print the error message from the server
+                    toast({ description: error.response.data.error }); // Print the error message from the server
                     console.error(error.response.status); // Print the status code
                     console.error(error.response.headers); // Print the headers
                 } else if (error.request) {
