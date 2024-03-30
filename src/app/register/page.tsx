@@ -51,8 +51,10 @@ const formSchema: any = z.object({
     stop_algo: z.boolean(),
     target: z.number().min(0, { message: "Target must be a positive number" }).optional(),
     loss: z.number().min(0, { message: "Loss must be a positive number" }).optional(),
-    lotes: z.nativeEnum(Lotes, { errorMap: (issue, ctx) => ({ message: 'Lotes must be between 1 and 10' }) }),
+    neftyLotes: z.nativeEnum(Lotes, { errorMap: () => ({ message: 'Lotes must be between 1 and 10' }) }),
+    bunneftyLotes: z.nativeEnum(Lotes, { errorMap: () => ({ message: 'Lotes must be between 1 and 10' }) })
 });
+
 
 export default function RegisterPage() {
     const { toast } = useToast();
@@ -73,7 +75,8 @@ export default function RegisterPage() {
             stop_algo: false,
             target: 40000,
             loss: 5000,
-            lotes: Lotes.ONE
+            neftyLotes: Lotes.ONE,
+            bunneftyLotes: Lotes.ONE
         },
     });
 
@@ -101,7 +104,7 @@ export default function RegisterPage() {
     const [nefty, setNefty] = useState(false);
     const [bunnefty, setBunnefty] = useState(false);
     const [stopAlgo, setStopAlgo] = useState(false);
-    const [lotes, setLotes] = useState(Lotes.ONE);
+
 
     const handleNeftyChange = () => {
         setNefty(!nefty);
@@ -118,9 +121,14 @@ export default function RegisterPage() {
         form.setValue("stop_algo", !stopAlgo);
     };
 
-    const handleLotesChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setLotes(Number(e.target.value) as Lotes);
-        form.setValue("lotes", Number(e.target.value));
+    const handleNeftyLotesChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const lotes = Number(e.target.value) as Lotes;
+        form.setValue("neftyLotes", lotes);
+    };
+
+    const handleBunneftyLotesChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const lotes = Number(e.target.value) as Lotes;
+        form.setValue("bunneftyLotes", lotes);
     };
 
 
@@ -295,8 +303,8 @@ export default function RegisterPage() {
                                         <FormControl>
                                             <select
                                                 id="lotes"
-                                                value={lotes}
-                                                onChange={handleLotesChange}
+                                                value={form.getValues('neftyLotes')}
+                                                onChange={handleNeftyLotesChange}
                                             >
                                                 {Object.values(Lotes).filter(Number).map((value) => (
                                                     <option key={value} value={value}>{value}</option>
@@ -325,8 +333,8 @@ export default function RegisterPage() {
                                         <FormControl>
                                             <select
                                                 id="lotes"
-                                                value={lotes}
-                                                onChange={handleLotesChange}
+                                                value={form.getValues('bunneftyLotes')}
+                                                onChange={handleBunneftyLotesChange}
                                             >
                                                 {Object.values(Lotes).filter(Number).map((value) => (
                                                     <option key={value} value={value}>{value}</option>
