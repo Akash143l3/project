@@ -138,7 +138,7 @@ export default function RegisterPage() {
 
     return (
         <div className="flex justify-center p-10" >
-            <div className=" w-1/2 p-10 rounded-2xl  border">
+            <div className="w-full md:w-1/2 lg:w-2/3 xl:w-1/2 p-10 rounded-2xl border">
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(handleRegistration)} className="space-y-8">
                         <h1 className="flex justify-center text-2xl font-semibold">Register</h1>
@@ -148,9 +148,9 @@ export default function RegisterPage() {
                             name="full_name"
                             render={({ field }) => (
                                 <FormItem>
-                                    <div className="flex space-x-4">
-                                        <FormLabel className="pt-3 w-1/2">Full Name</FormLabel>
-                                        <FormControl>
+                                     <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
+                                     <FormLabel className="w-full md:w-1/2">Full Name</FormLabel>
+                                     <FormControl className="w-full md:w-1/2">
                                             <Input placeholder="Full Name" {...field} />
                                         </FormControl>
                                     </div>
@@ -164,9 +164,9 @@ export default function RegisterPage() {
                             name="username"
                             render={({ field }) => (
                                 <FormItem>
-                                    <div className="flex space-x-4">
-                                        <FormLabel className="pt-3 w-1/2">User Name</FormLabel>
-                                        <FormControl>
+                                     <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
+                                     <FormLabel className="w-full md:w-1/2">User Name</FormLabel>
+                                     <FormControl className="w-full md:w-1/2">
                                             <Input placeholder="User Name" {...field} />
                                         </FormControl>
                                     </div>
@@ -180,9 +180,9 @@ export default function RegisterPage() {
                             name="user_password"
                             render={({ field }) => (
                                 <FormItem>
-                                    <div className="flex space-x-4">
-                                        <FormLabel className="pt-3 w-1/2">Password</FormLabel>
-                                        <FormControl>
+                                     <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
+                                     <FormLabel className="w-full md:w-1/2">Password</FormLabel>
+                                     <FormControl className="w-full md:w-1/2">
                                             <Input placeholder="password" {...field} type="password" />
                                         </FormControl>
                                     </div>
@@ -196,9 +196,9 @@ export default function RegisterPage() {
                             name="confirm_password"
                             render={({ field }) => (
                                 <FormItem>
-                                    <div className="flex space-x-4">
-                                        <FormLabel className="pt-3 w-1/2">Confirm Password</FormLabel>
-                                        <FormControl>
+                                    <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
+                                    <FormLabel className="w-full md:w-1/2">Confirm Password</FormLabel>
+                                    <FormControl className="w-full md:w-1/2">
                                             <Input placeholder="Confirm Password" {...field} type="password" />
                                         </FormControl>
                                     </div>
@@ -212,9 +212,9 @@ export default function RegisterPage() {
                             name="email_address"
                             render={({ field }) => (
                                 <FormItem>
-                                    <div className="flex space-x-4">
-                                        <FormLabel className="pt-3 w-1/2">Email Address</FormLabel>
-                                        <FormControl>
+                                     <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
+                                     <FormLabel className="w-full md:w-1/2">Email Address</FormLabel>
+                                     <FormControl className="w-full md:w-1/2">
                                             <Input placeholder="User@gmail.com" {...field} />
                                         </FormControl>
                                     </div>
@@ -228,9 +228,9 @@ export default function RegisterPage() {
                             name="phone_number"
                             render={({ field }) => (
                                 <FormItem>
-                                    <div className="flex space-x-4">
-                                        <FormLabel className="pt-3 w-1/2">Phone Number</FormLabel>
-                                        <FormControl>
+                                     <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
+                                     <FormLabel className="w-full md:w-1/2">Phone Number</FormLabel>
+                                     <FormControl className="w-full md:w-1/2">
                                             <Input placeholder="Phone Number" {...field} type="tel" pattern="[0-9]*"
                                                 onChange={(e) => {
                                                     const value = e.target.value.replace(/\D/g, ''); // Remove non-numeric characters
@@ -248,9 +248,9 @@ export default function RegisterPage() {
                             name="client_id"
                             render={({ field }) => (
                                 <FormItem>
-                                    <div className="flex space-x-4">
-                                        <FormLabel className="pt-3 w-1/2">ClientID</FormLabel>
-                                        <FormControl>
+                                   <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
+                                   <FormLabel className="w-full md:w-1/2">ClientID</FormLabel>
+                                   <FormControl className="w-full md:w-1/2">
                                             <Input placeholder="Client ID" {...field} type="tel" />
                                         </FormControl>
                                     </div>
@@ -264,9 +264,9 @@ export default function RegisterPage() {
                             name="api_key"
                             render={({ field }) => (
                                 <FormItem>
-                                    <div className="flex space-x-4">
-                                        <FormLabel className="pt-3 w-1/2">API Key</FormLabel>
-                                        <FormControl>
+                                     <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
+                                     <FormLabel className="w-full md:w-1/2">API Key</FormLabel>
+                                     <FormControl className="w-full md:w-1/2">
                                             <Input placeholder="API Key" {...field} required />
                                         </FormControl>
                                     </div>
@@ -280,9 +280,9 @@ export default function RegisterPage() {
                             name="api_secret"
                             render={({ field }) => (
                                 <FormItem>
-                                    <div className="flex space-x-4">
-                                        <FormLabel className="pt-3 w-1/2">API Secret</FormLabel>
-                                        <FormControl>
+                                    <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
+                                    <FormLabel className="w-full md:w-1/2">API Secret</FormLabel>
+                                    <FormControl className="w-full md:w-1/2">
                                             <Input placeholder="API SECRET" {...field} required />
                                         </FormControl>
                                     </div>
@@ -292,7 +292,7 @@ export default function RegisterPage() {
                         />
                         <FormItem>
                             <div className="flex items-center w-2/3 justify-between ">
-                                <div className="space-x-4">
+                            <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
                                 <input
                                     type="checkbox"
                                     id="nefty"
@@ -303,8 +303,8 @@ export default function RegisterPage() {
                                 </div>
                                 {(nefty ) && (
                                     <div>
-                                        <FormLabel >Lotes</FormLabel>
-                                        <FormControl>
+                                         <FormLabel className="w-full md:w-1/2">Lot Size</FormLabel>
+                                         <FormControl className="w-full md:w-1/2">
                                             <select
                                                 id="lotes"
                                                 value={form.getValues('neftyLotes')}
@@ -322,7 +322,7 @@ export default function RegisterPage() {
                         {/* Bunnefty Checkbox */}
                         <FormItem>
                         <div className="flex items-center w-2/3 justify-between ">
-                        <div className=" space-x-4">
+                        <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
                                 <input
                                     type="checkbox"
                                     id="bunnefty"
@@ -333,8 +333,8 @@ export default function RegisterPage() {
                                 </div>
                                 {( bunnefty) && (
                                     <div>
-                                        <FormLabel className=" w-1/2">Lotes</FormLabel>
-                                        <FormControl>
+                                        <FormLabel className="w-full md:w-1/2">Lot Size</FormLabel>
+                                        <FormControl className="w-full md:w-1/2">
                                             <select
                                                 id="lotes"
                                                 value={form.getValues('bunneftyLotes')}
@@ -351,7 +351,7 @@ export default function RegisterPage() {
                         </FormItem>
                         <FormItem>
                             <div className="flex items-center justify-between">
-                                <div className="space-x-4">
+                            <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
                                     <input
                                         type="checkbox"
                                         id="stop_algo"
@@ -362,19 +362,20 @@ export default function RegisterPage() {
                                 </div>
                                 {(stopAlgo) && (
                                     <div className="flex space-x-4">
-                                        <FormControl>
+                                        <FormControl className="w-full md:w-1/2">
                                             <Input
-                                                type="number"
+                                                type="tel"
                                                 placeholder="Target"
                                                 {...form.register("target")}
                                             />
                                            
                                         </FormControl>
-                                        <FormControl>
+                                        <FormControl className="w-full md:w-1/2">
                                             <Input
-                                                type="number"
-                                                placeholder="Loss"
-                                                {...form.register("loss")}
+                                                 type="tel"
+                                                 placeholder="Loss"
+                                                 {...form.register("loss")}
+                                                
                                             />
                                         </FormControl>
                                     </div>
