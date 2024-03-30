@@ -1,8 +1,8 @@
 "use client"
-
-import { z } from "zod"
+import { number, z } from "zod";
 import axios from 'axios';
-import { Button } from "@/components/ui/button"
+import { useState } from 'react';
+import { Button } from "@/components/ui/button";
 import {
     Form,
     FormControl,
@@ -10,12 +10,26 @@ import {
     FormItem,
     FormLabel,
     FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import Link from "next/link"
-import { useToast } from "@/components/ui/use-toast"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
+import { useToast } from "@/components/ui/use-toast";
+
+// Define enum for Lotes
+enum Lotes {
+    ONE = 1,
+    TWO = 2,
+    THREE = 3,
+    FOUR = 4,
+    FIVE = 5,
+    SIX = 6,
+    SEVEN = 7,
+    EIGHT = 8,
+    NINE = 9,
+    TEN = 10
+}
 
 
 const formSchema: any = z.object({
@@ -30,14 +44,18 @@ const formSchema: any = z.object({
         message: "Enter a valid 10-digit phone number",
     }),
     client_id: z.string(),
-    api_key: z.string(), //api key is not a number so we need to set it as any
-    api_secret: z.string()
-})
-
-
+    api_key: z.string(),
+    api_secret: z.string(),
+    nefty: z.boolean(),
+    bunnefty: z.boolean(),
+    stop_algo: z.boolean(),
+    target: z.number().min(0, { message: "Target must be a positive number" }).optional(),
+    loss: z.number().min(0, { message: "Loss must be a positive number" }).optional(),
+    lotes: z.nativeEnum(Lotes, { errorMap: (issue, ctx) => ({ message: 'Lotes must be between 1 and 10' }) }),
+});
 
 export default function RegisterPage() {
-    const { toast } = useToast()
+    const { toast } = useToast();
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -49,38 +67,61 @@ export default function RegisterPage() {
             phone_number: "",
             client_id: "",
             api_key: "",
-            api_secret: ""
-
+            api_secret: "",
+            nefty: false,
+            bunnefty: false,
+            stop_algo: false,
+            target: 40000,
+            loss: 5000,
+            lotes: Lotes.ONE
         },
+    });
 
-    })
     function handleRegistration(values: z.infer<typeof formSchema>) {
+        
+        
+        axios
+            .post('http://127.0.0.1:5000/register', values)
+            .then((response) => {
+                toast({ description: response.data.message });
+            })
+            .catch((error) => {
+                if (error.response) {
+                    toast({ description: error.response.data.error });
+                    console.error(error.response.status);
+                    console.error(error.response.headers);
+                } else if (error.request) {
+                    console.error(error.request);
+                } else {
+                    console.error('Error', error.message);
+                }
+            });
+    }
 
-            axios
-                .post('http://127.0.0.1:5000/register', values)
-                .then((response) => {
+    const [nefty, setNefty] = useState(false);
+    const [bunnefty, setBunnefty] = useState(false);
+    const [stopAlgo, setStopAlgo] = useState(false);
+    const [lotes, setLotes] = useState(Lotes.ONE);
 
-                    toast({ description: response.data.message })
-                    // Handle successful registration
-                })
-                .catch((error) => {
-                    if (error.response) {
-                        // The request was made and the server responded with a status code
-                        // that falls out of the range of 2xx
-                        toast({ description: error.response.data.error })// Print the error message from the server
-                        console.error(error.response.status); // Print the status code
-                        console.error(error.response.headers); // Print the headers
-                    } else if (error.request) {
-                        // The request was made but no response was received
-                        console.error(error.request);
-                    } else {
-                        // Something happened in setting up the request that triggered an error
-                        console.error('Error', error.message);
-                    }
-                    // Handle registration error
-                });
-        } 
-    
+    const handleNeftyChange = () => {
+        setNefty(!nefty);
+        form.setValue("nefty", !nefty);
+    };
+
+    const handleBunneftyChange = () => {
+        setBunnefty(!bunnefty);
+        form.setValue("bunnefty", !bunnefty);
+    };
+
+    const handleStopAlgoChange = () => {
+        setStopAlgo(!stopAlgo);
+        form.setValue("stop_algo", !stopAlgo);
+    };
+
+    const handleLotesChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setLotes(Number(e.target.value) as Lotes);
+        form.setValue("lotes", Number(e.target.value));
+    };
 
 
     return (
@@ -90,7 +131,6 @@ export default function RegisterPage() {
                     <form onSubmit={form.handleSubmit(handleRegistration)} className="space-y-8">
                         <h1 className="flex justify-center text-2xl font-semibold">Register</h1>
                         {/* Full Name */}
-
                         <FormField
                             control={form.control}
                             name="full_name"
@@ -106,10 +146,7 @@ export default function RegisterPage() {
                                 </FormItem>
                             )}
                         />
-
-
                         {/* User Name */}
-
                         <FormField
                             control={form.control}
                             name="username"
@@ -125,10 +162,7 @@ export default function RegisterPage() {
                                 </FormItem>
                             )}
                         />
-
-
                         {/* Password */}
-
                         <FormField
                             control={form.control}
                             name="user_password"
@@ -144,10 +178,7 @@ export default function RegisterPage() {
                                 </FormItem>
                             )}
                         />
-
-
                         {/* Confirm Password */}
-
                         <FormField
                             control={form.control}
                             name="confirm_password"
@@ -163,9 +194,7 @@ export default function RegisterPage() {
                                 </FormItem>
                             )}
                         />
-
                         {/* Email*/}
-
                         <FormField
                             control={form.control}
                             name="email_address"
@@ -181,9 +210,7 @@ export default function RegisterPage() {
                                 </FormItem>
                             )}
                         />
-
                         {/* Phone number */}
-
                         <FormField
                             control={form.control}
                             name="phone_number"
@@ -203,13 +230,7 @@ export default function RegisterPage() {
                                 </FormItem>
                             )}
                         />
-
-
-
-
-
                         {/* Client Id */}
-
                         <FormField
                             control={form.control}
                             name="client_id"
@@ -225,10 +246,7 @@ export default function RegisterPage() {
                                 </FormItem>
                             )}
                         />
-
-
                         {/* Api Key */}
-
                         <FormField
                             control={form.control}
                             name="api_key"
@@ -244,10 +262,7 @@ export default function RegisterPage() {
                                 </FormItem>
                             )}
                         />
-
-
                         {/* API Secret */}
-
                         <FormField
                             control={form.control}
                             name="api_secret"
@@ -263,11 +278,102 @@ export default function RegisterPage() {
                                 </FormItem>
                             )}
                         />
-
-
-
-                        <div className="flex flex-col justify-center gap-5"><Button type="submit">Submit</Button>
-                            <p>Already have an account...... <Link href={"/login"} className="pl-2 text-blue-600">Sign-In</Link></p></div>
+                        <FormItem>
+                            <div className="flex items-center w-2/3 justify-between ">
+                                <div className="space-x-4">
+                                <input
+                                    type="checkbox"
+                                    id="nefty"
+                                    checked={nefty}
+                                    onChange={handleNeftyChange}
+                                />
+                                <FormLabel htmlFor="nefty" className="pl-2">Nefty</FormLabel>
+                                </div>
+                                {(nefty ) && (
+                                    <div>
+                                        <FormLabel >Lotes</FormLabel>
+                                        <FormControl>
+                                            <select
+                                                id="lotes"
+                                                value={lotes}
+                                                onChange={handleLotesChange}
+                                            >
+                                                {Object.values(Lotes).filter(Number).map((value) => (
+                                                    <option key={value} value={value}>{value}</option>
+                                                ))}
+                                            </select>
+                                        </FormControl>
+                                    </div>
+                                )}
+                            </div>
+                        </FormItem>
+                        {/* Bunnefty Checkbox */}
+                        <FormItem>
+                        <div className="flex items-center w-2/3 justify-between ">
+                        <div className=" space-x-4">
+                                <input
+                                    type="checkbox"
+                                    id="bunnefty"
+                                    checked={bunnefty}
+                                    onChange={handleBunneftyChange}
+                                />
+                                <FormLabel htmlFor="bunnefty" className="pl-2">Bunnefty</FormLabel>
+                                </div>
+                                {( bunnefty) && (
+                                    <div>
+                                        <FormLabel className=" w-1/2">Lotes</FormLabel>
+                                        <FormControl>
+                                            <select
+                                                id="lotes"
+                                                value={lotes}
+                                                onChange={handleLotesChange}
+                                            >
+                                                {Object.values(Lotes).filter(Number).map((value) => (
+                                                    <option key={value} value={value}>{value}</option>
+                                                ))}
+                                            </select>
+                                        </FormControl>
+                                    </div>
+                                )}
+                            </div>
+                        </FormItem>
+                        <FormItem>
+                            <div className="flex items-center justify-between">
+                                <div className="space-x-4">
+                                    <input
+                                        type="checkbox"
+                                        id="stop_algo"
+                                        checked={stopAlgo}
+                                        onChange={handleStopAlgoChange}
+                                    />
+                                    <FormLabel htmlFor="stop_algo" className="pl-2">Stop algo when</FormLabel>
+                                </div>
+                                {(stopAlgo) && (
+                                    <div className="flex space-x-4">
+                                        <FormControl>
+                                            <Input
+                                                type="number"
+                                                placeholder="Target"
+                                                {...form.register("target")}
+                                            />
+                                           
+                                        </FormControl>
+                                        <FormControl>
+                                            <Input
+                                                type="number"
+                                                placeholder="Loss"
+                                                {...form.register("loss")}
+                                            />
+                                        </FormControl>
+                                    </div>
+                                )}
+                            </div>
+                        </FormItem>
+                        {/* Submit Button */}
+                        <div className="flex flex-col justify-center gap-5">
+                            <Button type="submit">Submit</Button>
+                            <p>Already have an account... <Link href={"/login"} className="pl-2 text-blue-600">Sign-In</Link></p>
+                        </div>
                     </form>
                 </Form>
             </div>
