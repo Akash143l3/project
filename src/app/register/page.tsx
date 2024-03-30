@@ -104,6 +104,8 @@ export default function RegisterPage() {
     const [nefty, setNefty] = useState(false);
     const [bunnefty, setBunnefty] = useState(false);
     const [stopAlgo, setStopAlgo] = useState(false);
+    const [neftyLotes, setNeftyLotes] = useState(Lotes.ONE); // State to manage Nefty Lotes
+    const [bunneftyLotes, setBunneftyLotes] = useState(Lotes.ONE); // State to manage Bunnefty Lotes
 
 
     const handleNeftyChange = () => {
@@ -123,12 +125,14 @@ export default function RegisterPage() {
 
     const handleNeftyLotesChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const lotes = Number(e.target.value) as Lotes;
-        form.setValue("neftyLotes", lotes);
+        setNeftyLotes(lotes); // Update state
+        form.setValue("neftyLotes", lotes); // Update form value
     };
 
     const handleBunneftyLotesChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const lotes = Number(e.target.value) as Lotes;
-        form.setValue("bunneftyLotes", lotes);
+        setBunneftyLotes(lotes); // Update state
+        form.setValue("bunneftyLotes", lotes); // Update form value
     };
 
 
