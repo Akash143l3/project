@@ -1,23 +1,224 @@
-import { Button } from '@/components/ui/button'
-import Link from 'next/link'
-import React from 'react'
+"use client"
+import { z } from "zod"
+import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form"
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import Link from "next/link"
+import axios from "axios"
+import { useToast } from "@/components/ui/use-toast"
+import { useEffect } from 'react';
 
-export default function LandingPage() {
-  return (
-    <div className="flex flex-col items-center justify-center h-screen">
-      <h1 className="text-4xl font-bold mb-8 pb-10">Welcome to our Application</h1>
-      <div className="flex space-x-4">
-        <Link href="/register">
+function redirectToHomePage() {
+    window.location.href = '/home'; // Replace '/home' with your home page URL
+}
 
-            <Button>Register</Button>
- 
-        </Link>
-        <Link href="/login">
-        
-            <Button>Login</Button>
-     
-        </Link>
-      </div>
-    </div>
-  )
+const formSchema = z.object({
+    username: z.string().min(2, { message: "Enter a valid username." }),
+    user_password: z.string().min(8, "Enter a valid password."),
+})
+
+export default function LoginPage() {
+    const { toast } = useToast();
+    const form = useForm<z.infer<typeof formSchema>>({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            username: "",
+            user_password: "",
+        },
+    })
+
+    useEffect(() => {
+        // Check if authentication is already done
+        const isAuthenticated = sessionStorage.getItem('isAuthenticated');
+
+        // If authenticated, redirect to the home page
+        if (isAuthenticated) {
+            redirectToHomePage(); // Replace '/home' with your home page URL
+        }
+    }, []);
+
+    function handleLogin(values: z.infer<typeof formSchema>) {
+        axios
+            .post('http://127.0.0.1:5000/login', values)
+            .then((response) => {
+                console.log(response.data);
+               
+                sessionStorage.setItem('isAuthenticated', 'true');
+
+                // Redirect to the home page
+                redirectToHomePage();
+                toast({ description: response.data.message })
+                // Handle successful login
+            })
+            .catch((error) => {
+                console.error(error);
+                if (error.response && error.response.data && error.response.data.error) {
+                    toast({ description: error.response.data.error });
+                } else {
+                    toast({ description: "An error occurred while logging in. Please try again later." });
+                }
+            });
+    }
+
+    function handleResetPassword(username: any, newPassword: any, confirmPassword: any) {
+        if (newPassword !== confirmPassword) {
+            // Handle password mismatch error
+            return toast({ description: "Confirm password is not the same" });
+        }
+
+        const data = {
+            username,
+            new_password: newPassword,
+        };
+
+        axios
+            .put('http://127.0.0.1:5000/reset-password', data)
+            .then((response) => {
+                // Handle successful password reset
+                toast({ description: response.data.message });
+                sessionStorage.setItem('isAuthenticated', 'true');
+
+                // Redirect to the home page
+                redirectToHomePage();
+            })
+            .catch((error) => {
+                if (error.response) {
+                    // The request was made and the server responded with a status code
+                    // that falls out of the range of 2xx
+                    toast({ description: error.response.data.error }); // Print the error message from the server
+                    console.error(error.response.status); // Print the status code
+                    console.error(error.response.headers); // Print the headers
+                } else if (error.request) {
+                    // The request was made but no response was received
+                    console.error(error.request);
+                } else {
+                    // Something happened in setting up the request that triggered an error
+                    console.error('Error', error.message);
+                }
+                // Handle reset password error
+            });
+    }
+
+    return (
+        <div className="flex justify-center p-4 md:p-10">
+            <div className="w-full md:w-1/2 lg:w-1/3 p-4 md:p-10 rounded-2xl border">
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(handleLogin)} className="space-y-4 md:space-y-8">
+                        <h1 className="text-2xl font-semibold text-center">Login</h1>
+
+                        {/* User Name */}
+                        <FormField
+                            control={form.control}
+                            name="username"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
+                                        <FormLabel className="w-full md:w-1/3 ">User Name</FormLabel>
+                                        <FormControl className="w-full md:w-2/3">
+                                            <Input placeholder="User Name" {...field} />
+                                        </FormControl>
+                                    </div>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        {/* Password */}
+                        <FormField
+                            control={form.control}
+                            name="user_password"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
+                                        <FormLabel className="w-full md:w-1/3 ">Password</FormLabel>
+                                        <FormControl className="w-full md:w-2/3">
+                                            <Input placeholder="Password" {...field} type="password" />
+                                        </FormControl>
+                                    </div>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <div className="flex flex-col md:flex-col justify-between items-center gap-4">
+                            <Button type="submit" className="w-full md:w-auto">Submit</Button>
+                            <div className="flex justify-between  w-full">
+                            <p className="flex md:text-left  ">
+                                <Link href={"/register"} className="text-sm">New User Registration ?</Link>
+                            </p>
+                            <Dialog>
+                                <DialogTrigger asChild>
+                                    <button className="text-sm md:text-right ">Forget Password</button>
+                                </DialogTrigger>
+                                <DialogContent className="sm:max-w-[425px]">
+                                    <DialogHeader>
+                                        <DialogTitle>Reset Password</DialogTitle>
+                                        <DialogDescription></DialogDescription>
+                                    </DialogHeader>
+                                    <div className="grid gap-4 py-4">
+                                        <div className="grid grid-cols-3 items-center gap-4">
+                                            <Label htmlFor="name" className="text-right">
+                                                User Name
+                                            </Label>
+                                            <Input id="username" placeholder="Username" className="col-span-2" />
+                                        </div>
+                                        <div className="grid grid-cols-3 items-center gap-4">
+                                            <Label htmlFor="newPassword" className="text-right">
+                                                New Password
+                                            </Label>
+                                            <Input id="newPassword" placeholder="New Password" className="col-span-2" type="password" />
+                                        </div>
+                                        <div className="grid grid-cols-3 items-center gap-4">
+                                            <Label htmlFor="confirmPassword" className="text-right w-max">
+                                                Confirm Password
+                                            </Label>
+                                            <Input id="confirmPassword" placeholder="Confirm Password" className="col-span-2" type="password" />
+                                        </div>
+                                    </div>
+                                    <DialogFooter>
+                                        <Button
+                                            type="submit"
+                                            onClick={() => {
+                                                const usernameInput = document.getElementById('username') as HTMLInputElement;
+                                                const newPasswordInput = document.getElementById('newPassword') as HTMLInputElement;
+                                                const confirmPasswordInput = document.getElementById('confirmPassword') as HTMLInputElement;
+
+                                                const username = usernameInput.value;
+                                                const newPassword = newPasswordInput.value;
+                                                const confirmPassword = confirmPasswordInput.value;
+
+                                                handleResetPassword(username, newPassword, confirmPassword);
+                                            }}
+                                        >
+                                            Save changes
+                                        </Button>
+                                    </DialogFooter>
+                                </DialogContent>
+                            </Dialog>
+                            </div>
+                        </div>
+                    </form>
+                </Form>
+            </div>
+        </div>
+    )
 }

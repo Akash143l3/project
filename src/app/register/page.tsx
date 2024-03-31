@@ -1,7 +1,7 @@
 "use client"
 import { number, z } from "zod";
 import axios from 'axios';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import {
     Form,
@@ -55,6 +55,10 @@ const formSchema: any = z.object({
     bunneftyLotes: z.nativeEnum(Lotes, { errorMap: () => ({ message: 'Lotes must be between 1 and 10' }) })
 });
 
+function redirectToHomePage() {
+    window.location.href = '/home';
+}
+
 
 export default function RegisterPage() {
     const { toast } = useToast();
@@ -80,9 +84,19 @@ export default function RegisterPage() {
         },
     });
 
+    useEffect(() => {
+        // Check if authentication is already done
+        const isAuthenticated = sessionStorage.getItem('isAuthenticated');
+
+        // If authenticated, redirect to the home page
+        if (isAuthenticated) {
+            redirectToHomePage(); // Replace '/home' with your home page URL
+        }
+    }, []);
+
     function handleRegistration(values: z.infer<typeof formSchema>) {
-        
-        
+
+
         axios
             .post('http://127.0.0.1:5000/register', values)
             .then((response) => {
@@ -148,9 +162,9 @@ export default function RegisterPage() {
                             name="full_name"
                             render={({ field }) => (
                                 <FormItem>
-                                     <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
-                                     <FormLabel className="w-full md:w-1/2">Full Name</FormLabel>
-                                     <FormControl className="w-full md:w-1/2">
+                                    <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
+                                        <FormLabel className="w-full md:w-1/2">Full Name</FormLabel>
+                                        <FormControl className="w-full md:w-1/2">
                                             <Input placeholder="Full Name" {...field} />
                                         </FormControl>
                                     </div>
@@ -164,9 +178,9 @@ export default function RegisterPage() {
                             name="username"
                             render={({ field }) => (
                                 <FormItem>
-                                     <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
-                                     <FormLabel className="w-full md:w-1/2">User Name</FormLabel>
-                                     <FormControl className="w-full md:w-1/2">
+                                    <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
+                                        <FormLabel className="w-full md:w-1/2">User Name</FormLabel>
+                                        <FormControl className="w-full md:w-1/2">
                                             <Input placeholder="User Name" {...field} />
                                         </FormControl>
                                     </div>
@@ -180,9 +194,9 @@ export default function RegisterPage() {
                             name="user_password"
                             render={({ field }) => (
                                 <FormItem>
-                                     <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
-                                     <FormLabel className="w-full md:w-1/2">Password</FormLabel>
-                                     <FormControl className="w-full md:w-1/2">
+                                    <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
+                                        <FormLabel className="w-full md:w-1/2">Password</FormLabel>
+                                        <FormControl className="w-full md:w-1/2">
                                             <Input placeholder="password" {...field} type="password" />
                                         </FormControl>
                                     </div>
@@ -197,8 +211,8 @@ export default function RegisterPage() {
                             render={({ field }) => (
                                 <FormItem>
                                     <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
-                                    <FormLabel className="w-full md:w-1/2">Confirm Password</FormLabel>
-                                    <FormControl className="w-full md:w-1/2">
+                                        <FormLabel className="w-full md:w-1/2">Confirm Password</FormLabel>
+                                        <FormControl className="w-full md:w-1/2">
                                             <Input placeholder="Confirm Password" {...field} type="password" />
                                         </FormControl>
                                     </div>
@@ -212,9 +226,9 @@ export default function RegisterPage() {
                             name="email_address"
                             render={({ field }) => (
                                 <FormItem>
-                                     <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
-                                     <FormLabel className="w-full md:w-1/2">Email Address</FormLabel>
-                                     <FormControl className="w-full md:w-1/2">
+                                    <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
+                                        <FormLabel className="w-full md:w-1/2">Email Address</FormLabel>
+                                        <FormControl className="w-full md:w-1/2">
                                             <Input placeholder="User@gmail.com" {...field} />
                                         </FormControl>
                                     </div>
@@ -228,9 +242,9 @@ export default function RegisterPage() {
                             name="phone_number"
                             render={({ field }) => (
                                 <FormItem>
-                                     <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
-                                     <FormLabel className="w-full md:w-1/2">Phone Number</FormLabel>
-                                     <FormControl className="w-full md:w-1/2">
+                                    <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
+                                        <FormLabel className="w-full md:w-1/2">Phone Number</FormLabel>
+                                        <FormControl className="w-full md:w-1/2">
                                             <Input placeholder="Phone Number" {...field} type="tel" pattern="[0-9]*"
                                                 onChange={(e) => {
                                                     const value = e.target.value.replace(/\D/g, ''); // Remove non-numeric characters
@@ -248,9 +262,9 @@ export default function RegisterPage() {
                             name="client_id"
                             render={({ field }) => (
                                 <FormItem>
-                                   <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
-                                   <FormLabel className="w-full md:w-1/2">ClientID</FormLabel>
-                                   <FormControl className="w-full md:w-1/2">
+                                    <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
+                                        <FormLabel className="w-full md:w-1/2">ClientID</FormLabel>
+                                        <FormControl className="w-full md:w-1/2">
                                             <Input placeholder="Client ID" {...field} type="tel" />
                                         </FormControl>
                                     </div>
@@ -264,9 +278,9 @@ export default function RegisterPage() {
                             name="api_key"
                             render={({ field }) => (
                                 <FormItem>
-                                     <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
-                                     <FormLabel className="w-full md:w-1/2">API Key</FormLabel>
-                                     <FormControl className="w-full md:w-1/2">
+                                    <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
+                                        <FormLabel className="w-full md:w-1/2">API Key</FormLabel>
+                                        <FormControl className="w-full md:w-1/2">
                                             <Input placeholder="API Key" {...field} required />
                                         </FormControl>
                                     </div>
@@ -281,8 +295,8 @@ export default function RegisterPage() {
                             render={({ field }) => (
                                 <FormItem>
                                     <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
-                                    <FormLabel className="w-full md:w-1/2">API Secret</FormLabel>
-                                    <FormControl className="w-full md:w-1/2">
+                                        <FormLabel className="w-full md:w-1/2">API Secret</FormLabel>
+                                        <FormControl className="w-full md:w-1/2">
                                             <Input placeholder="API SECRET" {...field} required />
                                         </FormControl>
                                     </div>
@@ -290,21 +304,23 @@ export default function RegisterPage() {
                                 </FormItem>
                             )}
                         />
+                        <div className="flex flex-col gap-4">
+                        <h1 className="text-lg font-semibold">Do you want to trade in</h1>
                         <FormItem>
                             <div className="flex items-center w-2/3 justify-between ">
-                            <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
-                                <input
-                                    type="checkbox"
-                                    id="nefty"
-                                    checked={nefty}
-                                    onChange={handleNeftyChange}
-                                />
-                                <FormLabel htmlFor="nefty" className="pl-2">Nefty</FormLabel>
+                                <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
+                                    <input
+                                        type="checkbox"
+                                        id="nefty"
+                                        checked={nefty}
+                                        onChange={handleNeftyChange}
+                                    />
+                                    <FormLabel htmlFor="nefty" className="pl-2">Nefty</FormLabel>
                                 </div>
-                                {(nefty ) && (
-                                    <div>
-                                         <FormLabel className="w-full md:w-1/2">Lot Size</FormLabel>
-                                         <FormControl className="w-full md:w-1/2">
+                                {(nefty) && (
+                                    <div >
+                                        <FormLabel className="w-full md:w-1/2">Lot Size</FormLabel>
+                                        <FormControl className="w-full md:w-1/2">
                                             <select
                                                 id="lotes"
                                                 value={form.getValues('neftyLotes')}
@@ -321,17 +337,17 @@ export default function RegisterPage() {
                         </FormItem>
                         {/* Bunnefty Checkbox */}
                         <FormItem>
-                        <div className="flex items-center w-2/3 justify-between ">
-                        <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
-                                <input
-                                    type="checkbox"
-                                    id="bunnefty"
-                                    checked={bunnefty}
-                                    onChange={handleBunneftyChange}
-                                />
-                                <FormLabel htmlFor="bunnefty" className="pl-2">Bunnefty</FormLabel>
+                            <div className="flex items-center w-2/3 justify-between ">
+                                <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
+                                    <input
+                                        type="checkbox"
+                                        id="bunnefty"
+                                        checked={bunnefty}
+                                        onChange={handleBunneftyChange}
+                                    />
+                                    <FormLabel htmlFor="bunnefty" className="pl-2">Bank nefty</FormLabel>
                                 </div>
-                                {( bunnefty) && (
+                                {(bunnefty) && (
                                     <div>
                                         <FormLabel className="w-full md:w-1/2">Lot Size</FormLabel>
                                         <FormControl className="w-full md:w-1/2">
@@ -349,9 +365,10 @@ export default function RegisterPage() {
                                 )}
                             </div>
                         </FormItem>
+                        </div>
                         <FormItem>
-                            <div className="flex items-center justify-between">
-                            <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
+                            <div className="flex flex-col ">
+                                <div className="flex  flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4 pb-5">
                                     <input
                                         type="checkbox"
                                         id="stop_algo"
@@ -361,23 +378,33 @@ export default function RegisterPage() {
                                     <FormLabel htmlFor="stop_algo" className="pl-2">Stop algo when</FormLabel>
                                 </div>
                                 {(stopAlgo) && (
-                                    <div className="flex space-x-4">
-                                        <FormControl className="w-full md:w-1/2">
-                                            <Input
-                                                type="tel"
-                                                placeholder="Target"
-                                                {...form.register("target")}
-                                            />
-                                           
-                                        </FormControl>
-                                        <FormControl className="w-full md:w-1/2">
-                                            <Input
-                                                 type="tel"
-                                                 placeholder="Loss"
-                                                 {...form.register("loss")}
-                                                
-                                            />
-                                        </FormControl>
+                                    <div className="flex flex-col space-x-4 gap-5">
+                                        <div className="flex items-center gap-2">
+                                            <p className="flex">Target of </p>
+                                            <FormControl className="w-full md:w-1/2">
+
+                                                <Input
+                                                    type="tel"
+                                                    placeholder="Target"
+                                                    {...form.register("target")}
+                                                />
+
+                                            </FormControl>
+                                            <p>is reached</p>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <p className="flex"> Loss of</p>
+                                            <FormControl className="w-full md:w-1/2">
+
+                                                <Input
+                                                    type="tel"
+                                                    placeholder="Loss"
+                                                    {...form.register("loss")}
+
+                                                />
+                                            </FormControl>
+                                            <p>is reaches</p>
+                                        </div>
                                     </div>
                                 )}
                             </div>
