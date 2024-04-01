@@ -1,81 +1,54 @@
-"use client"
-import { z } from "zod";
-import axios from 'axios';
-import { useEffect, useState } from 'react';
-import { Button } from "@/components/ui/button";
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from "@/components/ui/form";
+// RegistrationPage.js
+"use client";
+import React, { useState, ChangeEvent, FormEvent, useEffect } from "react";
+import axios from "axios";
 import { Input } from "@/components/ui/input";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import Link from "next/link";
 import { useToast } from "@/components/ui/use-toast";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
-// Define enum for Lot Sizes
-enum Lotes {
-    ONE = 1,
-    TWO = 2,
-    THREE = 3,
-    FOUR = 4,
-    FIVE = 5,
-    SIX = 6,
-    SEVEN = 7,
-    EIGHT = 8,
-    NINE = 9,
-    TEN = 10
+interface FormData {
+    first_name: string;
+    last_name: string;
+    user_id: string;
+    user_password: string;
+    email_address: string;
+    phone_number: string;
+    client_id: string;
+    api_key: string;
+    api_secret: string;
+    auth_key:string;
+    target_profit: number;
+    target_loss: number;
+    scrip_type: string[];
+    stop_algo: boolean; // Change false to boolean
+    lot_size: string[];
 }
 
-// Define form schema
-const formSchema = z.object({
-    first_name: z.string().min(3, { message: "First name must be more than two characters" }),
-    last_name: z.string().min(3, { message: "Last name must be more than two characters" }),
-    user_id: z.string().min(2, { message: "User ID must be at least 2 characters." }),
-    user_password: z.string().min(8, { message: "Password should contain more than 8 characters." }),
-    email_address: z.string().email("Invalid Email Address"),
-    phone_number: z.string().refine(value => /^\d{10}$/.test(value), { message: "Enter a valid 10-digit phone number" }),
-    client_id: z.string(),
-    api_key: z.string(),
-    api_secret: z.string(),
-    target_profit: z.number().min(0, { message: "Target profit must be a positive number" }),
-    target_loss: z.number().min(0, { message: "Target loss must be a positive number" }),
-    scrip_type: z.string(),
-    lot_size: z.number().min(1, { message: "Lot size must be a positive number" }),
-    stop_algo: z.boolean(),
-});
-
-// Function to redirect to home page
 function redirectToHomePage() {
     window.location.href = '/home';
 }
 
-export default function RegisterPage() {
+export default function RegistrationPage() {
     const { toast } = useToast();
-    const form = useForm<z.infer<typeof formSchema>>({
-        resolver: zodResolver(formSchema),
-        defaultValues: {
-            first_name: "",
-            last_name: "",
-            user_id: "",
-            user_password: "",
-            email_address: "",
-            phone_number: "",
-            client_id: "",
-            api_key: "",
-            api_secret: "",
-            target_profit: 0,
-            target_loss: 0,
-            scrip_type: "",
-            lot_size: 1
-        },
+    const [formData, setFormData] = useState<FormData>({
+        first_name: "",
+        last_name: "",
+        user_id: "",
+        user_password: "",
+        email_address: "",
+        phone_number: "",
+        client_id: "",
+        api_key: "",
+        api_secret: "",
+        auth_key:"",
+        target_profit: 40000,
+        target_loss: 5000,
+        scrip_type: [],
+        stop_algo: false,
+        lot_size: ["1"]
     });
 
-    // Check if authentication is already done
     useEffect(() => {
         const isAuthenticated = sessionStorage.getItem('isAuthenticated');
 
@@ -84,12 +57,79 @@ export default function RegisterPage() {
             redirectToHomePage();
         }
     }, []);
+    const [niftyLotSize, setNiftyLotSize] = useState("1");
+    const [bankNiftyLotSize, setBankNiftyLotSize] = useState("1");
 
-    // Function to handle form submission
-    function handleRegistration(values: z.infer<typeof formSchema>) {
+    const [errorMessage, setErrorMessage] = useState<string | null>(null); // State to hold error message
+    const handleChange = (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLSelectElement>) => {
+        const { name, value, type } = e.target as HTMLInputElement | HTMLSelectElement;
+    
+        if (type === "tel" && isNaN(Number(value))) {
+            // Ignore alphabetic characters
+            return;
+        }
+    
+        if (type === "checkbox") {
+            const checked = (e.target as HTMLInputElement).checked;
+            if (name === "stop_algo") {
+                setFormData({ ...formData, stop_algo: checked });
+            } else {
+                let updatedScripType = [...formData.scrip_type];
+                if (checked) {
+                    updatedScripType = [...updatedScripType, value];
+                } else {
+                    updatedScripType = updatedScripType.filter(item => item !== value);
+                }
+                setFormData({ ...formData, scrip_type: updatedScripType });
+            }
+        } else if (name === "niftyLotSize") {
+            const niftyLotSizeValue = value;
+            setNiftyLotSize(niftyLotSizeValue);
+            if (formData.scrip_type.includes("Bank Nifty")) {
+                setFormData({ ...formData, scrip_type: ["Nifty", "Bank Nifty"], lot_size: [niftyLotSizeValue, bankNiftyLotSize] });
+            } else {
+                setFormData({ ...formData, scrip_type: ["Nifty"], lot_size: [niftyLotSizeValue] });
+            }
+        } else if (name === "bankniftyLotSize") {
+            const bankNiftyLotSizeValue = value;
+            setBankNiftyLotSize(bankNiftyLotSizeValue);
+            if (formData.scrip_type.includes("Nifty")) {
+                setFormData({ ...formData, scrip_type: ["Nifty", "Bank Nifty"], lot_size: [niftyLotSize, bankNiftyLotSizeValue] });
+            } else {
+                setFormData({ ...formData, scrip_type: ["Bank Nifty"], lot_size: [bankNiftyLotSizeValue] });
+            }
+        } else if (name === "target_profit") {
+            const targetProfitValue = Number(value);
+            setFormData({ ...formData, target_profit: targetProfitValue });
+            if (targetProfitValue < 40000) {
+                setErrorMessage("Target profit must be at least 40000.");
+            } else {
+                setErrorMessage(null);
+            }
+        } else if (name === "target_loss") {
+            const targetLossValue = Number(value);
+            setFormData({ ...formData, target_loss: targetLossValue });
+            if (targetLossValue < 5000) {
+                setErrorMessage("Target loss must be at least 5000.");
+            } else {
+                setErrorMessage(null);
+            }
+        } else {
+            setFormData({ ...formData, [name]: value });
+        }
+    };
+    
+
+
+
+
+
+    const handleSubmit = (e: FormEvent) => {
+        e.preventDefault();
         axios
-            .post('http://127.0.0.1:5000/register', values)
+            .post("http://127.0.0.1:5000/register", formData)
             .then((response) => {
+                console.log(response.data);
                 toast({ description: response.data.message });
             })
             .catch((error) => {
@@ -103,302 +143,365 @@ export default function RegisterPage() {
                     console.error('Error', error.message);
                 }
             });
-    }
-
-    // State and functions to handle Nefty checkbox and lot size
-    const [nefty, setNefty] = useState(false);
-    const [neftyLotSize, setNeftyLotSize] = useState(Lotes.ONE);
-
-    const handleNeftyChange = () => {
-        setNefty(!nefty);
-        form.setValue("scrip_type", !nefty ? "Nefty" : "");
     };
 
-    const handleNeftyLotSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const lotSize = Number(e.target.value) as Lotes;
-        setNeftyLotSize(lotSize);
-        form.setValue("lot_size", lotSize);
-    };
-
-    // State and functions to handle Bunnefty checkbox and lot size
-    const [bunnefty, setBunnefty] = useState(false);
-    const [bunneftyLotSize, setBunneftyLotSize] = useState(Lotes.ONE);
-
-    const handleBunneftyChange = () => {
-        setBunnefty(!bunnefty);
-        form.setValue("scrip_type", !bunnefty ? "Bunnefty" : "");
-    };
-
-    const handleBunneftyLotSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const lotSize = Number(e.target.value) as Lotes;
-    setBunneftyLotSize(lotSize);
-    form.setValue("lot_size", lotSize);
-};
-    // State and function to handle Stop Algo checkbox
-    const [stopAlgo, setStopAlgo] = useState(false);
-
-    const handleStopAlgoChange = () => {
-        setStopAlgo(!stopAlgo);
-        form.setValue("stop_algo", !stopAlgo);
-    };
-    
     return (
-        <div className="flex justify-center p-10">
-            <div className="w-full md:w-1/2 lg:w-2/3 xl:w-1/2 p-10 rounded-2xl border">
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(handleRegistration)} className="space-y-8">
-                        <h1 className="flex justify-center text-2xl font-semibold">Register</h1>
+        <div className="min-h-screen bg-gray-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+            <div className="sm:mx-auto sm:w-full sm:max-w-md">
+                <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Register your account</h2>
+            </div>
 
-                        {/* Full Name Field */}
-                        <FormField
-                            control={form.control}
-                            name="first_name"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
-                                        <FormLabel className="w-full md:w-1/2">Full Name</FormLabel>
-                                        <FormControl className="w-full md:w-1/2">
-                                            <Input placeholder="Full Name" {...field} />
-                                        </FormControl>
-                                    </div>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
-                        {/* Username Field */}
-                        <FormField
-                            control={form.control}
-                            name="last_name"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
-                                        <FormLabel className="w-full md:w-1/2">User Name</FormLabel>
-                                        <FormControl className="w-full md:w-1/2">
-                                            <Input placeholder="User Name" {...field} />
-                                        </FormControl>
-                                    </div>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
-                        {/* Password Field */}
-                        <FormField
-                            control={form.control}
-                            name="user_password"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
-                                        <FormLabel className="w-full md:w-1/2">Password</FormLabel>
-                                        <FormControl className="w-full md:w-1/2">
-                                            <Input placeholder="Password" {...field} type="password" />
-                                        </FormControl>
-                                    </div>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
-                        {/* Email Address Field */}
-                        <FormField
-                            control={form.control}
-                            name="email_address"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
-                                        <FormLabel className="w-full md:w-1/2">Email Address</FormLabel>
-                                        <FormControl className="w-full md:w-1/2">
-                                            <Input placeholder="User@gmail.com" {...field} />
-                                        </FormControl>
-                                    </div>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
-                        {/* Phone Number Field */}
-                        <FormField
-                            control={form.control}
-                            name="phone_number"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
-                                        <FormLabel className="w-full md:w-1/2">Phone Number</FormLabel>
-                                        <FormControl className="w-full md:w-1/2">
-                                            <Input placeholder="Phone Number" {...field} type="tel" pattern="[0-9]*"
-                                                onChange={(e) => {
-                                                    const value = e.target.value.replace(/\D/g, ''); // Remove non-numeric characters
-                                                    field.onChange(value);
-                                                }} />
-                                        </FormControl>
-                                    </div>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
-                        {/* Client ID Field */}
-                        <FormField
-                            control={form.control}
-                            name="client_id"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
-                                        <FormLabel className="w-full md:w-1/2">Client ID</FormLabel>
-                                        <FormControl className="w-full md:w-1/2">
-                                            <Input placeholder="Client ID" {...field} type="tel" />
-                                        </FormControl>
-                                    </div>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
-                        {/* API Key Field */}
-                        <FormField
-                            control={form.control}
-                            name="api_key"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
-                                        <FormLabel className="w-full md:w-1/2">API Key</FormLabel>
-                                        <FormControl className="w-full md:w-1/2">
-                                            <Input placeholder="API Key" {...field} required />
-                                        </FormControl>
-                                    </div>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
-                        {/* API Secret Field */}
-                        <FormField
-                            control={form.control}
-                            name="api_secret"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
-                                        <FormLabel className="w-full md:w-1/2">API Secret</FormLabel>
-                                        <FormControl className="w-full md:w-1/2">
-                                            <Input placeholder="API Secret" {...field} required />
-                                        </FormControl>
-                                    </div>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-
-                        {/* Nefty Checkbox */}
-                        <FormItem>
-                            <div className="flex items-center w-2/3 justify-between ">
-                                <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
-                                    <input
-                                        type="checkbox"
-                                        id="nefty"
-                                        checked={nefty}
-                                        onChange={handleNeftyChange}
-                                    />
-                                    <FormLabel htmlFor="nefty" className="pl-2">Nefty</FormLabel>
-                                </div>
-                                {(nefty) && (
-                                    <div>
-                                        <FormLabel className="w-full md:w-1/2">Lot Size</FormLabel>
-                                        <FormControl className="w-full md:w-1/2">
-                                            <select
-                                                id="lotes"
-                                                value={neftyLotSize}
-                                                onChange={handleNeftyLotSizeChange}
-                                            >
-                                                {Object.values(Lotes).filter(Number).map((value) => (
-                                                    <option key={value} value={value}>{value}</option>
-                                                ))}
-                                            </select>
-                                        </FormControl>
-                                    </div>
-                                )}
+            <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+                <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+                    <form className="space-y-6" onSubmit={handleSubmit}>
+                        <div>
+                            <label htmlFor="first_name" className="block text-sm font-medium text-gray-700">
+                                First Name
+                            </label>
+                            <div className="mt-1">
+                                <Input
+                                    id="first_name"
+                                    name="first_name"
+                                    type="text"
+                                    autoComplete="given-name"
+                                    required
+                                    className="input-field"
+                                    value={formData.first_name}
+                                    onChange={handleChange}
+                                />
                             </div>
-                        </FormItem>
-
-                        {/* Bunnefty Checkbox */}
-                        <FormItem>
-                            <div className="flex items-center w-2/3 justify-between ">
-                                <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
-                                    <input
-                                        type="checkbox"
-                                        id="bunnefty"
-                                        checked={bunnefty}
-                                        onChange={handleBunneftyChange}
-                                    />
-                                    <FormLabel htmlFor="bunnefty" className="pl-2">Bank Nefty</FormLabel>
-                                </div>
-                                {(bunnefty) && (
-                                    <div>
-                                        <FormLabel className="w-full md:w-1/2">Lot Size</FormLabel>
-                                        <FormControl className="w-full md:w-1/2">
-                                            <select
-                                                id="lotes"
-                                                value={bunneftyLotSize}
-                                                onChange={handleBunneftyLotSizeChange}
-                                            >
-                                                {Object.values(Lotes).filter(Number).map((value) => (
-                                                    <option key={value} value={value}>{value}</option>
-                                                ))}
-                                            </select>
-                                        </FormControl>
-                                    </div>
-                                )}
-                            </div>
-                        </FormItem>
-
-                        {/* Stop Algo Checkbox */}
-                        <FormItem>
-                            <div className="flex flex-col ">
-                                <div className="flex  flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4 pb-5">
-                                    <input
-                                        type="checkbox"
-                                        id="stop_algo"
-                                        checked={stopAlgo}
-                                        onChange={handleStopAlgoChange}
-                                    />
-                                    <FormLabel htmlFor="stop_algo" className="pl-2">Stop algo when</FormLabel>
-                                </div>
-                                {(stopAlgo) && (
-                                    <div className="flex flex-col space-x-4 gap-5">
-                                        <div className="flex items-center gap-2">
-                                            <p className="flex">Target of </p>
-                                            <FormControl className="w-full md:w-1/2">
-                                                <Input
-                                                    type="tel"
-                                                    placeholder="Target"
-                                                    {...form.register("target_profit")}
-                                                />
-                                            </FormControl>
-                                            <p>is reached</p>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <p className="flex"> Loss of</p>
-                                            <FormControl className="w-full md:w-1/2">
-                                                <Input
-                                                    type="tel"
-                                                    placeholder="Loss"
-                                                    {...form.register("target_loss")}
-                                                />
-                                            </FormControl>
-                                            <p>is reached</p>
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        </FormItem>
-
-                        {/* Submit Button */}
-                        <div className="flex flex-col justify-center gap-5">
-                            <Button type="submit">Submit</Button>
-                            <p>Already have an account... <Link href={"/login"} className="pl-2 text-blue-600">Sign-In</Link></p>
                         </div>
+
+                        <div>
+                            <label htmlFor="last_name" className="block text-sm font-medium text-gray-700">
+                                Last Name
+                            </label>
+                            <div className="mt-1">
+                                <Input
+                                    id="last_name"
+                                    name="last_name"
+                                    type="text"
+                                    autoComplete="family-name"
+                                    required
+                                    className="input-field"
+                                    value={formData.last_name}
+                                    onChange={handleChange}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Repeat similar structure for other input fields */}
+                        {/* User ID */}
+                        <div>
+                            <label htmlFor="user_id" className="block text-sm font-medium text-gray-700">
+                                User ID
+                            </label>
+                            <div className="mt-1">
+                                <Input
+                                    id="user_id"
+                                    name="user_id"
+                                    type="text"
+                                    autoComplete="username"
+                                    required
+                                    className="input-field"
+                                    value={formData.user_id}
+                                    onChange={handleChange}
+                                />
+                            </div>
+                        </div>
+
+                        {/* User Password */}
+                        <div>
+                            <label htmlFor="user_password" className="block text-sm font-medium text-gray-700">
+                                Password
+                            </label>
+                            <div className="mt-1">
+                                <Input
+                                    id="user_password"
+                                    name="user_password"
+                                    type="password"
+                                    autoComplete="current-password"
+                                    required
+                                    className="input-field"
+                                    value={formData.user_password}
+                                    onChange={handleChange}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Email Address */}
+                        <div>
+                            <label htmlFor="email_address" className="block text-sm font-medium text-gray-700">
+                                Email Address
+                            </label>
+                            <div className="mt-1">
+                                <Input
+                                    id="email_address"
+                                    name="email_address"
+                                    type="email"
+                                    autoComplete="email"
+                                    required
+                                    className="input-field"
+                                    value={formData.email_address}
+                                    onChange={handleChange}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Phone Number */}
+                        <div>
+                            <label htmlFor="phone_number" className="block text-sm font-medium text-gray-700">
+                                Phone Number
+                            </label>
+                            <div className="mt-1">
+                                <Input
+                                    id="phone_number"
+                                    name="phone_number"
+                                    type="tel"
+                                    autoComplete="tel"
+                                    required
+                                    className="input-field"
+                                    value={formData.phone_number}
+                                    onChange={handleChange}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Client ID */}
+                        <div>
+                            <label htmlFor="client_id" className="block text-sm font-medium text-gray-700">
+                                Client ID
+                            </label>
+                            <div className="mt-1">
+                                <Input
+                                    id="client_id"
+                                    name="client_id"
+                                    type="text"
+                                    autoComplete="client-id"
+                                    required
+                                    className="input-field"
+                                    value={formData.client_id}
+                                    onChange={handleChange}
+                                />
+                            </div>
+                        </div>
+
+                        {/* API Key */}
+                        <div>
+                            <label htmlFor="api_key" className="block text-sm font-medium text-gray-700">
+                                API Key
+                            </label>
+                            <div className="mt-1">
+                                <Input
+                                    id="api_key"
+                                    name="api_key"
+                                    type="text"
+                                    autoComplete="api-key"
+                                    required
+                                    className="input-field"
+                                    value={formData.api_key}
+                                    onChange={handleChange}
+                                />
+                            </div>
+                        </div>
+
+
+                        
+
+                        {/* API Secret */}
+                        <div>
+                            <label htmlFor="api_secret" className="block text-sm font-medium text-gray-700">
+                                API Secret
+                            </label>
+                            <div className="mt-1">
+                                <Input
+                                    id="api_secret"
+                                    name="api_secret"
+                                    type="text"
+                                    autoComplete="api-secret"
+                                    required
+                                    className="input-field"
+                                    value={formData.api_secret}
+                                    onChange={handleChange}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Auth Key */}
+                        <div>
+                            <label htmlFor="api_key" className="block text-sm font-medium text-gray-700">
+                                Auth Key
+                            </label>
+                            <div className="mt-1">
+                                <Input
+                                    id="auth_key"
+                                    name="auth_key"
+                                    type="text"
+                                    autoComplete="auth-key"
+                                    required
+                                    className="input-field"
+                                    value={formData.auth_key}
+                                    onChange={handleChange}
+                                />
+                            </div>
+                        </div>
+
+
+                        <h1>What do you want to Trade in </h1>
+
+                        {/* Checkbox for Scrip Type (Nifty) */}
+                        <div className="flex items-center">
+                            <Input
+                                id="scrip_type_nifty"
+                                name="scrip_type"
+                                type="checkbox"
+                                value="Nifty"
+                                className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                                checked={formData.scrip_type.includes("Nifty")}
+                                onChange={handleChange}
+                            />
+                            <label htmlFor="scrip_type_nifty" className="ml-2 block text-sm text-gray-900">
+                                Nifty
+                            </label>
+                        </div>
+
+                        {/* Input field for Nifty Lot Size */}
+                        {formData.scrip_type.includes("Nifty") && (
+                            <div>
+                                <label htmlFor="niftyLotSize" className="block text-sm font-medium text-gray-700">
+                                    Nifty Lot Size
+                                </label>
+                                <div className="mt-1">
+                                    <select
+                                        id="niftyLotSize"
+                                        name="niftyLotSize"
+                                        className="input-field"
+                                        value={niftyLotSize}
+                                        onChange={handleChange}
+                                        required
+                                    >
+                                        {/* Mapping options from 1 to 10 */}
+                                        {[...Array(10)].map((_, index) => (
+                                            <option key={index + 1} value={index + 1}>
+                                                {index + 1}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+                        )}
+
+
+                        {/* Checkbox for Scrip Type (Bank Nifty) */}
+                        <div className="flex items-center">
+                            <Input
+                                id="scrip_type_bank_nifty"
+                                name="scrip_type"
+                                type="checkbox"
+                                value="Bank Nifty"
+                                className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                                checked={formData.scrip_type.includes("Bank Nifty")}
+                                onChange={handleChange}
+                            />
+                            <label htmlFor="scrip_type_bank_nifty" className="ml-2 block text-sm text-gray-900">
+                                Bank Nifty
+                            </label>
+                        </div>
+
+                        {/* Input field for Bank Nifty Lot Size */}
+                        {formData.scrip_type.includes("Bank Nifty") && (
+                            <div>
+                                <label htmlFor="bankniftyLotSize" className="block text-sm font-medium text-gray-700">
+                                    Bank Nifty Lot Size
+                                </label>
+                                <div className="mt-1">
+
+                                    <select
+                                        id="bankniftyLotSize"
+                                        name="bankniftyLotSize"
+                                        className="input-field"
+                                        value={bankNiftyLotSize}
+                                        onChange={handleChange}
+                                        required
+                                    >
+                                        {/* Mapping options from 1 to 10 */}
+                                        {[...Array(10)].map((_, index) => (
+                                            <option key={index + 1} value={index + 1}>
+                                                {index + 1}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+                        )}
+                        {/* Checkbox for Stop Algo */}
+                        {/* Checkbox for Stop Algo */}
+                        <div className="flex items-center">
+                            <Input
+                                id="stop_algo"
+                                name="stop_algo"
+                                type="checkbox"
+                                className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                                checked={formData.stop_algo}
+                                onChange={handleChange}
+                            />
+                            <label htmlFor="stop_algo" className="ml-2 block text-sm text-gray-900">
+                                Stop Algo When
+                            </label>
+                        </div>
+
+                        {/* Input fields for Target Profit and Loss */}
+                        {formData.stop_algo && (
+                            <div >
+                                <label htmlFor="target_loss" className="block text-sm font-medium text-gray-700">
+                                    Target of Profit is 
+                                </label>
+                                <div className="mt-1">
+                                    <Input
+                                        id="target_profit"
+                                        name="target_profit"
+                                        type="tel"
+                                        min="40000"
+                                        required
+                                        className="input-field"
+                                        value={formData.target_profit}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                            </div>
+                        )}
+                        {formData.stop_algo && (
+                            <div>
+                                <label htmlFor="target_loss" className="block text-sm font-medium text-gray-700">
+                                    Target of Loss is 
+                                </label>
+                                <div className="mt-1">
+                                    <Input
+                                        id="target_loss"
+                                        name="target_loss"
+                                        type="tel"
+                                        min="5000"
+                                        required
+                                        className="input-field"
+                                        value={formData.target_loss}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="flex flex-col justify-center gap-5">
+                            <Button
+                                type="submit"
+                                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                            >
+                                Register
+                            </Button>
+                            <p>Already have an account... <Link href={"/"} className="pl-2 text-blue-600">Sign-In</Link></p>
+                        </div>
+
                     </form>
-                </Form>
+                </div>
             </div>
         </div>
     );
