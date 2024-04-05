@@ -15,7 +15,7 @@ async function getData(): Promise<Transaction[]> {
   
   return [
     {
-      date: "2024-04-01",
+      date: "04-01-2024",
       scrip: "ABC",
       costPrice: 50,
       qty: 100,
@@ -31,7 +31,7 @@ async function getData(): Promise<Transaction[]> {
         pl: 1000,
       },
       {
-        date: "2024-04-01",
+        date: "2024-01-01",
         scrip: "ABC",
         costPrice: 50,
         qty: 100,
@@ -39,7 +39,7 @@ async function getData(): Promise<Transaction[]> {
         pl: 1000,
       },
       {
-        date: "2024-04-01",
+        date: "2024-02-01",
         scrip: "ABC",
         costPrice: 50,
         qty: 100,
@@ -47,7 +47,7 @@ async function getData(): Promise<Transaction[]> {
         pl: 1000,
       },
       {
-        date: "2024-04-01",
+        date: "2024-03-01",
         scrip: "ABC",
         costPrice: 50,
         qty: 100,
@@ -55,13 +55,61 @@ async function getData(): Promise<Transaction[]> {
         pl: 1000,
       },
       {
-        date: "2024-04-01",
+        date: "2023-02-01",
         scrip: "ABC",
         costPrice: 50,
         qty: 100,
         sellPrice: 60,
         pl: 1000,
       },
+      {
+        date: "04-01-2024",
+        scrip: "ABC",
+        costPrice: 50,
+        qty: 100,
+        sellPrice: 60,
+        pl: 1000,
+      },
+      {
+          date: "2024-04-01",
+          scrip: "ABC",
+          costPrice: 50,
+          qty: 100,
+          sellPrice: 60,
+          pl: 1000,
+        },
+        {
+          date: "2024-01-01",
+          scrip: "ABC",
+          costPrice: 50,
+          qty: 100,
+          sellPrice: 60,
+          pl: 1000,
+        },
+        {
+          date: "2024-02-01",
+          scrip: "ABC",
+          costPrice: 50,
+          qty: 100,
+          sellPrice: 60,
+          pl: 1000,
+        },
+        {
+          date: "2024-03-01",
+          scrip: "ABC",
+          costPrice: 50,
+          qty: 100,
+          sellPrice: 60,
+          pl: 1000,
+        },
+        {
+          date: "2023-02-01",
+          scrip: "ABC",
+          costPrice: 50,
+          qty: 100,
+          sellPrice: 60,
+          pl: 1000,
+        },
     // Add more transaction objects as needed
   ];
 }

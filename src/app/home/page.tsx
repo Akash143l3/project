@@ -38,15 +38,9 @@ export default function Home() {
     }, []);
 
     return (
-        <div className="">
+        <div className="flex flex-col pt-60 gap-10 items-center h-full w-full">
             <div>
-                <h1>Welcome {userName}</h1>
-               <div>
-                
-
-
-
-               </div>
+                <h1 className='text-2xl font-semibold'>Welcome {userName}</h1>
             </div>
             <Button onClick={logout}>Logout</Button>
         </div>

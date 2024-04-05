@@ -1,4 +1,6 @@
 "use client"
+
+// Import necessary dependencies and interfaces
 import * as React from "react";
 import DatePicker from "@/components/ui/datepicker";
 import {
@@ -33,23 +35,34 @@ interface TableData {
     pl: number;
 }
 
+// Define props interface for DataTable component
 interface DataTableProps<TData> {
     columns: ColumnDef<TData>[];
     data: TData[];
 }
 
-export type { ColumnDef };
-export function DataTable({
-    columns,
-    data,
-}: DataTableProps<TableData>) {
+// DataTable component
+export function DataTable({ columns, data }: DataTableProps<TableData>) {
+    // State variables
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
     const [startDate, setStartDate] = React.useState<Date | null>(null);
     const [endDate, setEndDate] = React.useState<Date | null>(null);
-    const [filteredData, setFilteredData] = React.useState<TableData[]>([]); // State variable for filtered data
+    const [filteredData, setFilteredData] = React.useState<TableData[]>(data); // Initialize with original data
     const [filterValue, setFilterValue] = React.useState<string>(""); // State variable for filter value
 
+    // Handler for filter value change
+    const handleFilterValueChange = (value: string | null) => {
+        if (value) {
+            setFilterValue(value.toLowerCase());
+            updateFilteredData();
+        } else {
+            setFilterValue("");
+            setFilteredData(data);
+        }
+    };
+
+    // Handler for date range change
     const handleDateRangeChange = (start: Date | null, end: Date | null) => {
         setStartDate(start);
         setEndDate(end);
@@ -62,22 +75,15 @@ export function DataTable({
             });
             // Update table data
             setFilteredData(filteredData);
-            setColumnFilters([{ id: "date", value: [start, end] }]);
+            setColumnFilters([{ id: "Date", value: [start, end] }]);
         } else {
             // Reset filter if no date range selected
-            setFilteredData([]);
+            setFilteredData(data);
             setColumnFilters([]);
         }
     };
 
-    const handleFilterValueChange = (value: string | null) => {
-        if (value) {
-            setFilterValue(value.toLowerCase());
-        } else {
-            setFilterValue("");
-        }
-    };
-
+    // Filter function
     const filterFn = (row: any, columnFilters: any) => {
         const dateFilter = columnFilters.some((filter: any) => {
             const [start, end] = filter.value as [Date, Date];
@@ -85,13 +91,22 @@ export function DataTable({
             return itemDate >= start && itemDate <= end;
         });
 
-        const textFilter = row.original.scrip.toLowerCase().includes(filterValue);
+        const textFilter = typeof filterValue === 'string' ? row.original.scrip.toLowerCase().includes(filterValue) : true;
 
         return dateFilter && textFilter;
     };
 
+    // Update filtered data based on filter value
+    const updateFilteredData = () => {
+        const filteredData = data.filter((item) =>
+            item.scrip.toLowerCase().includes(filterValue)
+        );
+        setFilteredData(filteredData);
+    };
+
+    // React table instance
     const table = useReactTable({
-        data: filteredData.length > 0 ? filteredData : data, // Use filteredData if available, otherwise use original data
+        data: filteredData,
         columns,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
@@ -117,6 +132,14 @@ export function DataTable({
                     endDate={endDate}
                     onDateChange={(start, end) => handleDateRangeChange(start, end)}
                 />
+                {/* Scrip filter */}
+                <input
+                    type="text"
+                    placeholder="Filter by scrip"
+                    value={filterValue}
+                    onChange={(e) => handleFilterValueChange(e.target.value)}
+                    className="ml-4 rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                />
             </div>
             <div className="rounded-md border">
                 <Table>
@@ -137,7 +160,7 @@ export function DataTable({
                         ))}
                     </TableHeader>
                     <TableBody>
-                        {table.getRowModel().rows?.length? (
+                        {table.getRowModel().rows?.length ? (
                             table.getRowModel().rows.map((row) => (
                                 <TableRow
                                     key={row.id}
@@ -184,3 +207,5 @@ export function DataTable({
         </div>
     );
 }
+
+export type { ColumnDef };

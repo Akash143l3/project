@@ -32,8 +32,8 @@ function redirectToHomePage() {
 }
 
 const formSchema = z.object({
-    username: z.string().min(2, { message: "Enter a valid username." }),
-    user_password: z.string().min(8, "Enter a valid password."),
+    user_id: z.string().min(2, { message: "Enter a valid username." }),
+    user_password: z.string().min(6, "Enter a valid password."),
 })
 
 export default function LoginPage() {
@@ -41,7 +41,7 @@ export default function LoginPage() {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            username: "",
+            user_id: "",
             user_password: "",
         },
     })
@@ -79,14 +79,14 @@ export default function LoginPage() {
             });
     }
 
-    function handleResetPassword(username: any, newPassword: any, confirmPassword: any) {
+    function handleResetPassword(user_id: any, newPassword: any, confirmPassword: any) {
         if (newPassword !== confirmPassword) {
             // Handle password mismatch error
             return toast({ description: "Confirm password is not the same" });
         }
 
         const data = {
-            username,
+            user_id,
             new_password: newPassword,
         };
 
@@ -109,6 +109,7 @@ export default function LoginPage() {
                     console.error(error.response.headers); // Print the headers
                 } else if (error.request) {
                     // The request was made but no response was received
+
                     console.error(error.request);
                 } else {
                     // Something happened in setting up the request that triggered an error
@@ -128,11 +129,11 @@ export default function LoginPage() {
                         {/* User Name */}
                         <FormField
                             control={form.control}
-                            name="username"
+                            name="user_id"
                             render={({ field }) => (
                                 <FormItem>
                                     <div className="flex flex-col md:flex-row items-start space-y-4 md:space-y-0 md:space-x-4">
-                                        <FormLabel className="w-full md:w-1/3 ">User Name</FormLabel>
+                                        <FormLabel className="w-full md:w-1/3 ">User ID</FormLabel>
                                         <FormControl className="w-full md:w-2/3">
                                             <Input placeholder="User Name" {...field} />
                                         </FormControl>
@@ -179,7 +180,7 @@ export default function LoginPage() {
                                             <Label htmlFor="name" className="text-right">
                                                 User Name
                                             </Label>
-                                            <Input id="username" placeholder="Username" className="col-span-2" />
+                                            <Input id="user_id" placeholder="Username" className="col-span-2" />
                                         </div>
                                         <div className="grid grid-cols-3 items-center gap-4">
                                             <Label htmlFor="newPassword" className="text-right">
@@ -198,15 +199,15 @@ export default function LoginPage() {
                                         <Button
                                             type="submit"
                                             onClick={() => {
-                                                const usernameInput = document.getElementById('username') as HTMLInputElement;
+                                                const user_idInput = document.getElementById('user_id') as HTMLInputElement;
                                                 const newPasswordInput = document.getElementById('newPassword') as HTMLInputElement;
                                                 const confirmPasswordInput = document.getElementById('confirmPassword') as HTMLInputElement;
 
-                                                const username = usernameInput.value;
+                                                const user_id = user_idInput.value;
                                                 const newPassword = newPasswordInput.value;
                                                 const confirmPassword = confirmPasswordInput.value;
 
-                                                handleResetPassword(username, newPassword, confirmPassword);
+                                                handleResetPassword(user_id, newPassword, confirmPassword);
                                             }}
                                         >
                                             Save changes

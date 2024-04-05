@@ -22,7 +22,7 @@ interface FormData {
     target_loss: number;
     scrip_type: string[];
     stop_algo: boolean; // Change false to boolean
-    lot_size: string[];
+    lot_qty: string[];
 }
 
 function redirectToHomePage() {
@@ -46,7 +46,7 @@ export default function RegistrationPage() {
         target_loss: 5000,
         scrip_type: [],
         stop_algo: false,
-        lot_size: ["1"]
+        lot_qty: ["1"]
     });
 
     useEffect(() => {
@@ -85,18 +85,18 @@ export default function RegistrationPage() {
         } else if (name === "niftyLotSize") {
             const niftyLotSizeValue = value;
             setNiftyLotSize(niftyLotSizeValue);
-            if (formData.scrip_type.includes("Bank Nifty")) {
-                setFormData({ ...formData, scrip_type: ["Nifty", "Bank Nifty"], lot_size: [niftyLotSizeValue, bankNiftyLotSize] });
+            if (formData.scrip_type.includes("BANKNIFTY")) {
+                setFormData({ ...formData, scrip_type: ["Nifty", "BANKNIFTY"], lot_qty: [niftyLotSizeValue, bankNiftyLotSize] });
             } else {
-                setFormData({ ...formData, scrip_type: ["Nifty"], lot_size: [niftyLotSizeValue] });
+                setFormData({ ...formData, scrip_type: ["Nifty"], lot_qty: [niftyLotSizeValue] });
             }
         } else if (name === "bankniftyLotSize") {
             const bankNiftyLotSizeValue = value;
             setBankNiftyLotSize(bankNiftyLotSizeValue);
             if (formData.scrip_type.includes("Nifty")) {
-                setFormData({ ...formData, scrip_type: ["Nifty", "Bank Nifty"], lot_size: [niftyLotSize, bankNiftyLotSizeValue] });
+                setFormData({ ...formData, scrip_type: ["Nifty", "BANKNIFTY"], lot_qty: [niftyLotSize, bankNiftyLotSizeValue] });
             } else {
-                setFormData({ ...formData, scrip_type: ["Bank Nifty"], lot_size: [bankNiftyLotSizeValue] });
+                setFormData({ ...formData, scrip_type: ["BANKNIFTY"], lot_qty: [bankNiftyLotSizeValue] });
             }
         } else if (name === "target_profit") {
             const targetProfitValue = Number(value);
@@ -131,6 +131,8 @@ export default function RegistrationPage() {
             .then((response) => {
                 console.log(response.data);
                 toast({ description: response.data.message });
+                sessionStorage.setItem('isAuthenticated', 'true');
+                redirectToHomePage();
             })
             .catch((error) => {
                 if (error.response) {
@@ -369,7 +371,7 @@ export default function RegistrationPage() {
                         {formData.scrip_type.includes("Nifty") && (
                             <div>
                                 <label htmlFor="niftyLotSize" className="block text-sm font-medium text-gray-700">
-                                    Nifty Lot Size
+                                    Nifty Lot Qty
                                 </label>
                                 <div className="mt-1">
                                     <select
@@ -398,21 +400,21 @@ export default function RegistrationPage() {
                                 id="scrip_type_bank_nifty"
                                 name="scrip_type"
                                 type="checkbox"
-                                value="Bank Nifty"
+                                value="BANKNIFTY"
                                 className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-                                checked={formData.scrip_type.includes("Bank Nifty")}
+                                checked={formData.scrip_type.includes("BANKNIFTY")}
                                 onChange={handleChange}
                             />
                             <label htmlFor="scrip_type_bank_nifty" className="ml-2 block text-sm text-gray-900">
-                                Bank Nifty
+                                Bank Nifty 
                             </label>
                         </div>
 
                         {/* Input field for Bank Nifty Lot Size */}
-                        {formData.scrip_type.includes("Bank Nifty") && (
+                        {formData.scrip_type.includes("BANKNIFTY") && (
                             <div>
                                 <label htmlFor="bankniftyLotSize" className="block text-sm font-medium text-gray-700">
-                                    Bank Nifty Lot Size
+                                    Bank Nifty Lot Qty
                                 </label>
                                 <div className="mt-1">
 
