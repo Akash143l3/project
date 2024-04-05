@@ -6,6 +6,27 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { z } from "zod";
+
+
+const FormDataSchema = z.object({
+    first_name: z.string().min(2,"First name must  be at least 2 characters long"),
+    last_name: z.string().min(2,"Last name must  be at least 2 characters long "),
+    user_id: z.string(),
+    user_password: z.string(),
+    email_address: z.string().email(),
+    phone_number: z.string(),
+    client_id: z.string(),
+    api_key: z.string(),
+    api_secret: z.string(),
+    auth_key: z.string(),
+    target_profit: z.number().min(40000),
+    target_loss: z.number().min(5000),
+    scrip_type: z.array(z.string()),
+    stop_algo: z.boolean(),
+    lot_qty: z.array(z.string()),
+});
+
 
 interface FormData {
     first_name: string;
@@ -17,12 +38,17 @@ interface FormData {
     client_id: string;
     api_key: string;
     api_secret: string;
-    auth_key:string;
+    auth_key: string;
     target_profit: number;
     target_loss: number;
     scrip_type: string[];
     stop_algo: boolean; // Change false to boolean
     lot_qty: string[];
+}
+
+interface ValidationError {
+    path: string[]; // The path to the field that failed validation
+    message: string; // The error message
 }
 
 function redirectToHomePage() {
@@ -41,7 +67,7 @@ export default function RegistrationPage() {
         client_id: "",
         api_key: "",
         api_secret: "",
-        auth_key:"",
+        auth_key: "",
         target_profit: 40000,
         target_loss: 5000,
         scrip_type: [],
@@ -60,15 +86,16 @@ export default function RegistrationPage() {
     const [niftyLotSize, setNiftyLotSize] = useState("1");
     const [bankNiftyLotSize, setBankNiftyLotSize] = useState("1");
 
-    const [errorMessage, setErrorMessage] = useState<string | null>(null); // State to hold error message
+    const [errorMessage, setErrorMessage] = useState< string | null>(null); // State to hold error message
     const handleChange = (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLSelectElement>) => {
+        setErrorMessage(null); 
         const { name, value, type } = e.target as HTMLInputElement | HTMLSelectElement;
-    
+
         if (type === "tel" && isNaN(Number(value))) {
             // Ignore alphabetic characters
             return;
         }
-    
+
         if (type === "checkbox") {
             const checked = (e.target as HTMLInputElement).checked;
             if (name === "stop_algo") {
@@ -102,7 +129,7 @@ export default function RegistrationPage() {
             const targetProfitValue = Number(value);
             setFormData({ ...formData, target_profit: targetProfitValue });
             if (targetProfitValue < 40000) {
-                setErrorMessage("Target profit must be at least 40000.");
+                setErrorMessage( "Target profit must be at least 40000.");
             } else {
                 setErrorMessage(null);
             }
@@ -118,7 +145,7 @@ export default function RegistrationPage() {
             setFormData({ ...formData, [name]: value });
         }
     };
-    
+
 
 
 
@@ -126,25 +153,40 @@ export default function RegistrationPage() {
 
     const handleSubmit = (e: FormEvent) => {
         e.preventDefault();
-        axios
-            .post("http://127.0.0.1:5000/register", formData)
-            .then((response) => {
-                console.log(response.data);
-                toast({ description: response.data.message });
-                sessionStorage.setItem('isAuthenticated', 'true');
-                redirectToHomePage();
-            })
-            .catch((error) => {
-                if (error.response) {
-                    toast({ description: error.response.data.error });
-                    console.error(error.response.status);
-                    console.error(error.response.headers);
-                } else if (error.request) {
-                    console.error(error.request);
-                } else {
-                    console.error('Error', error.message);
-                }
-            });
+        try {
+            const validatedData = FormDataSchema.parse(formData);
+            axios
+                .post("http://127.0.0.1:5000/register", validatedData)
+                .then((response) => {
+                    console.log(response.data);
+                    toast({ description: response.data.message });
+                    sessionStorage.setItem('isAuthenticated', 'true');
+                    redirectToHomePage();
+                })
+                .catch((error) => {
+                    if (error.response) {
+                        toast({ description: error.response.data.error });
+                        console.error(error.response.status);
+                        console.error(error.response.headers);
+                    } else if (error.request) {
+                        console.error(error.request);
+                    } else {
+                        console.error('Error', error.message);
+                    }
+                });
+        } catch (error) {
+            if (error instanceof z.ZodError) {
+                // Handle validation errors
+                const errorMessage = error.errors[0]?.message
+                console.error('Validation failed:',errorMessage);
+                setErrorMessage(errorMessage);
+
+                toast({ description: "An error occurred , Please Try again later" });
+                toast({description:errorMessage})
+            } else {
+                console.error('Unknown error:', error);
+            }
+        }
     };
 
     return (
@@ -165,12 +207,14 @@ export default function RegistrationPage() {
                                     id="first_name"
                                     name="first_name"
                                     type="text"
-                                    autoComplete="given-name"
                                     required
+                                    autoComplete="given-name"
                                     className="input-field"
                                     value={formData.first_name}
                                     onChange={handleChange}
                                 />
+                                
+
                             </div>
                         </div>
 
@@ -182,9 +226,9 @@ export default function RegistrationPage() {
                                 <Input
                                     id="last_name"
                                     name="last_name"
+                                    required
                                     type="text"
                                     autoComplete="family-name"
-                                    required
                                     className="input-field"
                                     value={formData.last_name}
                                     onChange={handleChange}
@@ -203,8 +247,8 @@ export default function RegistrationPage() {
                                     id="user_id"
                                     name="user_id"
                                     type="text"
-                                    autoComplete="username"
                                     required
+                                    autoComplete="username"
                                     className="input-field"
                                     value={formData.user_id}
                                     onChange={handleChange}
@@ -222,8 +266,8 @@ export default function RegistrationPage() {
                                     id="user_password"
                                     name="user_password"
                                     type="password"
-                                    autoComplete="current-password"
                                     required
+                                    autoComplete="current-password"
                                     className="input-field"
                                     value={formData.user_password}
                                     onChange={handleChange}
@@ -241,12 +285,13 @@ export default function RegistrationPage() {
                                     id="email_address"
                                     name="email_address"
                                     type="email"
-                                    autoComplete="email"
                                     required
+                                    autoComplete="email"
                                     className="input-field"
                                     value={formData.email_address}
                                     onChange={handleChange}
                                 />
+                                
                             </div>
                         </div>
 
@@ -260,8 +305,8 @@ export default function RegistrationPage() {
                                     id="phone_number"
                                     name="phone_number"
                                     type="tel"
-                                    autoComplete="tel"
                                     required
+                                    autoComplete="tel"
                                     className="input-field"
                                     value={formData.phone_number}
                                     onChange={handleChange}
@@ -279,8 +324,8 @@ export default function RegistrationPage() {
                                     id="client_id"
                                     name="client_id"
                                     type="text"
-                                    autoComplete="client-id"
                                     required
+                                    autoComplete="client-id"
                                     className="input-field"
                                     value={formData.client_id}
                                     onChange={handleChange}
@@ -298,8 +343,8 @@ export default function RegistrationPage() {
                                     id="api_key"
                                     name="api_key"
                                     type="text"
-                                    autoComplete="api-key"
                                     required
+                                    autoComplete="api-key"
                                     className="input-field"
                                     value={formData.api_key}
                                     onChange={handleChange}
@@ -308,7 +353,7 @@ export default function RegistrationPage() {
                         </div>
 
 
-                        
+
 
                         {/* API Secret */}
                         <div>
@@ -320,8 +365,8 @@ export default function RegistrationPage() {
                                     id="api_secret"
                                     name="api_secret"
                                     type="text"
-                                    autoComplete="api-secret"
                                     required
+                                    autoComplete="api-secret"
                                     className="input-field"
                                     value={formData.api_secret}
                                     onChange={handleChange}
@@ -339,8 +384,8 @@ export default function RegistrationPage() {
                                     id="auth_key"
                                     name="auth_key"
                                     type="text"
-                                    autoComplete="auth-key"
                                     required
+                                    autoComplete="auth-key"
                                     className="input-field"
                                     value={formData.auth_key}
                                     onChange={handleChange}
@@ -406,7 +451,7 @@ export default function RegistrationPage() {
                                 onChange={handleChange}
                             />
                             <label htmlFor="scrip_type_bank_nifty" className="ml-2 block text-sm text-gray-900">
-                                Bank Nifty 
+                                Bank Nifty
                             </label>
                         </div>
 
@@ -456,7 +501,7 @@ export default function RegistrationPage() {
                         {formData.stop_algo && (
                             <div >
                                 <label htmlFor="target_loss" className="block text-sm font-medium text-gray-700">
-                                    Target of Profit is 
+                                    Target of Profit is
                                 </label>
                                 <div className="mt-1">
                                     <Input
@@ -475,7 +520,7 @@ export default function RegistrationPage() {
                         {formData.stop_algo && (
                             <div>
                                 <label htmlFor="target_loss" className="block text-sm font-medium text-gray-700">
-                                    Target of Loss is 
+                                    Target of Loss is
                                 </label>
                                 <div className="mt-1">
                                     <Input

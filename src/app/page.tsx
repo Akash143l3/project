@@ -168,7 +168,7 @@ export default function LoginPage() {
                             </p>
                             <Dialog>
                                 <DialogTrigger asChild>
-                                    <button className="text-sm md:text-right ">Forget Password</button>
+                                    <button className="text-sm md:text-right ">Forgot Password</button>
                                 </DialogTrigger>
                                 <DialogContent className="sm:max-w-[425px]">
                                     <DialogHeader>
@@ -178,9 +178,9 @@ export default function LoginPage() {
                                     <div className="grid gap-4 py-4">
                                         <div className="grid grid-cols-3 items-center gap-4">
                                             <Label htmlFor="name" className="text-right">
-                                                User Name
+                                            User ID
                                             </Label>
-                                            <Input id="user_id" placeholder="Username" className="col-span-2" />
+                                            <Input id="user_id" placeholder=" User ID" className="col-span-2" />
                                         </div>
                                         <div className="grid grid-cols-3 items-center gap-4">
                                             <Label htmlFor="newPassword" className="text-right">
