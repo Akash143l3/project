@@ -95,7 +95,17 @@ export default function RegistrationPage() {
 
         if (type === "checkbox") {
             const checked = (e.target as HTMLInputElement).checked;
-            
+            if (name === "stop_algo") {
+                
+            } else {
+                let updatedScripType = [...formData.scrip_type];
+                if (checked) {
+                    updatedScripType = [...updatedScripType, value];
+                } else {
+                    updatedScripType = updatedScripType.filter(item => item !== value);
+                }
+                setFormData({ ...formData, scrip_type: updatedScripType });
+            }
         } else if (name === "niftyLotSize") {
             const niftyLotSizeValue = value;
             setNiftyLotSize(niftyLotSizeValue);
@@ -156,9 +166,11 @@ export default function RegistrationPage() {
                         console.error(error.response.status);
                         console.error(error.response.headers);
                     } else if (error.request) {
-                        console.error(error.request);
+                        console.error("failed" ,error.request);
+                        toast({ description: error.request });
                     } else {
                         console.error('Error', error.message);
+                        toast({ description: error.message });
                     }
                 });
         } catch (error) {
@@ -382,7 +394,7 @@ export default function RegistrationPage() {
                         </div>
 
 
-                        <h1 className="font-semibold"> What do you want to Trade in </h1>
+                        <h1 className="font-semibold">What do you want to Trade in </h1>
 
                         {/* Checkbox for Scrip Type (Nifty) */}
                         <div className="flex items-center">
@@ -469,11 +481,7 @@ export default function RegistrationPage() {
                                 </div>
                             </div>
                         )}
-                      
-
-
-                      <h1 className="font-semibold"> Stop Algo When</h1>
-
+                      <h1 className="font-semibold">   Stop Algo When</h1>
                         {/* Input fields for Target Profit and Loss */}
                             <div >
                                 <label htmlFor="target_loss" className="block text-sm font-medium text-gray-700">
@@ -492,7 +500,7 @@ export default function RegistrationPage() {
                                     />
                                 </div>
                             </div>
-                   
+                       
                             <div>
                                 <label htmlFor="target_loss" className="block text-sm font-medium text-gray-700">
                                     Target of Loss is
@@ -510,7 +518,7 @@ export default function RegistrationPage() {
                                     />
                                 </div>
                             </div>
-                
+                    
 
                         <div className="flex flex-col justify-center gap-5">
                             <Button
