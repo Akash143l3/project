@@ -162,8 +162,11 @@ export default function RegistrationPage() {
                 })
                 .catch((error) => {
                     if (error.response) {
-                        toast({ description: error.response.data.error });
+                        toast({ description: error.response.data.error});
                         console.error(error.response.status);
+                        if(error.response.status===500){
+                            toast({ description: "An error occurred , Please Try again later" });
+                        }
                         console.error(error.response.headers);
                     } else if (error.request) {
                         console.error("failed" ,error.request);
