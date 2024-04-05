@@ -12,8 +12,8 @@ import { z } from "zod";
 const FormDataSchema = z.object({
     first_name: z.string().min(2,"First name must  be at least 2 characters long"),
     last_name: z.string().min(2,"Last name must  be at least 2 characters long "),
-    user_id: z.string(),
-    user_password: z.string(),
+    user_id: z.string().min(2,"User id must contain more than 2 characters"),
+    user_password: z.string().min(6, "password must contain minimum 6 characters"),
     email_address: z.string().email(),
     phone_number: z.string(),
     client_id: z.string(),
@@ -192,6 +192,7 @@ export default function RegistrationPage() {
     return (
         <div className="min-h-screen bg-gray-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
             <div className="sm:mx-auto sm:w-full sm:max-w-md">
+            <div className="flex items-center justify-center"><img src="./logo.png" /></div>
                 <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Register your account</h2>
             </div>
 

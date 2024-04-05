@@ -38,11 +38,18 @@ export default function Home() {
     }, []);
 
     return (
-        <div className="flex flex-col pt-60 gap-10 items-center h-full w-full">
-            <div>
-                <h1 className='text-2xl font-semibold'>Welcome {userName}</h1>
+        <div>
+        <div >
+            <img src="./logo.png" />
+            </div>
+        <div className="flex flex-col justify-center pt-32 gap-5 items-center h-full w-full">
+            <div className='flex flex-col gap-3'>
+                <h1 className='text-2xl font-semibold'>Welcome to our Application</h1>
+                <h2 className='text-center text-lg'>Website coming soon</h2>
             </div>
             <Button onClick={logout}>Logout</Button>
+        </div>
+        
         </div>
     );
 }
