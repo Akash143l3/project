@@ -23,7 +23,6 @@ const FormDataSchema = z.object({
     target_profit: z.number().min(40000),
     target_loss: z.number().min(5000),
     scrip_type: z.array(z.string()),
-    stop_algo: z.boolean(),
     lot_qty: z.array(z.string()),
 });
 
@@ -41,8 +40,7 @@ interface FormData {
     auth_key: string;
     target_profit: number;
     target_loss: number;
-    scrip_type: string[];
-    stop_algo: boolean; // Change false to boolean
+    scrip_type: string[];// Change false to boolean
     lot_qty: string[];
 }
 
@@ -71,7 +69,6 @@ export default function RegistrationPage() {
         target_profit: 40000,
         target_loss: 5000,
         scrip_type: [],
-        stop_algo: false,
         lot_qty: ["1"]
     });
 
@@ -98,17 +95,7 @@ export default function RegistrationPage() {
 
         if (type === "checkbox") {
             const checked = (e.target as HTMLInputElement).checked;
-            if (name === "stop_algo") {
-                setFormData({ ...formData, stop_algo: checked });
-            } else {
-                let updatedScripType = [...formData.scrip_type];
-                if (checked) {
-                    updatedScripType = [...updatedScripType, value];
-                } else {
-                    updatedScripType = updatedScripType.filter(item => item !== value);
-                }
-                setFormData({ ...formData, scrip_type: updatedScripType });
-            }
+            
         } else if (name === "niftyLotSize") {
             const niftyLotSizeValue = value;
             setNiftyLotSize(niftyLotSizeValue);
@@ -395,7 +382,7 @@ export default function RegistrationPage() {
                         </div>
 
 
-                        <h1>What do you want to Trade in </h1>
+                        <h1 className="font-semibold"> What do you want to Trade in </h1>
 
                         {/* Checkbox for Scrip Type (Nifty) */}
                         <div className="flex items-center">
@@ -482,24 +469,12 @@ export default function RegistrationPage() {
                                 </div>
                             </div>
                         )}
-                        {/* Checkbox for Stop Algo */}
-                        {/* Checkbox for Stop Algo */}
-                        <div className="flex items-center">
-                            <Input
-                                id="stop_algo"
-                                name="stop_algo"
-                                type="checkbox"
-                                className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
-                                checked={formData.stop_algo}
-                                onChange={handleChange}
-                            />
-                            <label htmlFor="stop_algo" className="ml-2 block text-sm text-gray-900">
-                                Stop Algo When
-                            </label>
-                        </div>
+                      
+
+
+                      <h1 className="font-semibold"> Stop Algo When</h1>
 
                         {/* Input fields for Target Profit and Loss */}
-                        {formData.stop_algo && (
                             <div >
                                 <label htmlFor="target_loss" className="block text-sm font-medium text-gray-700">
                                     Target of Profit is
@@ -517,8 +492,7 @@ export default function RegistrationPage() {
                                     />
                                 </div>
                             </div>
-                        )}
-                        {formData.stop_algo && (
+                   
                             <div>
                                 <label htmlFor="target_loss" className="block text-sm font-medium text-gray-700">
                                     Target of Loss is
@@ -536,7 +510,7 @@ export default function RegistrationPage() {
                                     />
                                 </div>
                             </div>
-                        )}
+                
 
                         <div className="flex flex-col justify-center gap-5">
                             <Button
