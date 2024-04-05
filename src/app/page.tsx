@@ -169,7 +169,7 @@ export default function LoginPage() {
                                         </DialogHeader>
                                         <div className="grid gap-4 py-4">
                                             <div className="grid grid-cols-3 items-center gap-4">
-                                                <Label htmlFor="name" className="text-right">
+                                                <Label htmlFor="name" className="text-right md:w-auto">
                                                     User ID
                                                 </Label>
                                                 <Input id="user_id" placeholder=" User ID" className="col-span-2" required />
@@ -181,7 +181,7 @@ export default function LoginPage() {
                                                 <Input id="newPassword" placeholder="New Password" className="col-span-2" type="password" required />
                                             </div>
                                             <div className="grid grid-cols-3 items-center gap-4">
-                                                <Label htmlFor="confirmPassword" className="text-right w-max">
+                                                <Label htmlFor="confirmPassword" className="text-right lg:w-max md:w-max">
                                                     Confirm Password
                                                 </Label>
                                                 <Input id="confirmPassword" placeholder="Confirm Password" className="col-span-2" type="password" />
