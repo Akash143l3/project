@@ -23,7 +23,7 @@ const FormDataSchema = z.object({
     target_profit: z.number().min(40000),
     target_loss: z.number().min(5000),
     scrip_type: z.array(z.string()),
-    lot_qty: z.array(z.string()),
+    order_amount: z.array(z.string()),
 });
 
 
@@ -41,7 +41,7 @@ interface FormData {
     target_profit: number;
     target_loss: number;
     scrip_type: string[];// Change false to boolean
-    lot_qty: string[];
+    order_amount: string[];
 }
 
 interface ValidationError {
@@ -69,7 +69,7 @@ export default function RegistrationPage() {
         target_profit: 40000,
         target_loss: 5000,
         scrip_type: [],
-        lot_qty: ["1"]
+        order_amount: ["5000","5000"]
     });
 
     useEffect(() => {
@@ -80,8 +80,8 @@ export default function RegistrationPage() {
             redirectToHomePage();
         }
     }, []);
-    const [niftyLotSize, setNiftyLotSize] = useState("1");
-    const [bankNiftyLotSize, setBankNiftyLotSize] = useState("1");
+    const [niftyLotSize, setNiftyLotSize] = useState("5000");
+    const [bankNiftyLotSize, setBankNiftyLotSize] = useState("5000");
 
     const [errorMessage, setErrorMessage] = useState< string | null>(null); // State to hold error message
     const handleChange = (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLSelectElement>) => {
@@ -110,17 +110,17 @@ export default function RegistrationPage() {
             const niftyLotSizeValue = value;
             setNiftyLotSize(niftyLotSizeValue);
             if (formData.scrip_type.includes("BANKNIFTY")) {
-                setFormData({ ...formData, scrip_type: ["Nifty", "BANKNIFTY"], lot_qty: [niftyLotSizeValue, bankNiftyLotSize] });
+                setFormData({ ...formData, scrip_type: ["Nifty", "BANKNIFTY"], order_amount: [niftyLotSizeValue, bankNiftyLotSize] });
             } else {
-                setFormData({ ...formData, scrip_type: ["Nifty"], lot_qty: [niftyLotSizeValue] });
+                setFormData({ ...formData, scrip_type: ["Nifty"], order_amount: [niftyLotSizeValue] });
             }
         } else if (name === "bankniftyLotSize") {
             const bankNiftyLotSizeValue = value;
             setBankNiftyLotSize(bankNiftyLotSizeValue);
             if (formData.scrip_type.includes("Nifty")) {
-                setFormData({ ...formData, scrip_type: ["Nifty", "BANKNIFTY"], lot_qty: [niftyLotSize, bankNiftyLotSizeValue] });
+                setFormData({ ...formData, scrip_type: ["Nifty", "BANKNIFTY"], order_amount: [niftyLotSize, bankNiftyLotSizeValue] });
             } else {
-                setFormData({ ...formData, scrip_type: ["BANKNIFTY"], lot_qty: [bankNiftyLotSizeValue] });
+                setFormData({ ...formData, scrip_type: ["BANKNIFTY"], order_amount: [bankNiftyLotSizeValue] });
             }
         } else if (name === "target_profit") {
             const targetProfitValue = Number(value);
@@ -419,24 +419,19 @@ export default function RegistrationPage() {
                         {formData.scrip_type.includes("Nifty") && (
                             <div>
                                 <label htmlFor="niftyLotSize" className="block text-sm font-medium text-gray-700">
-                                    Nifty Lot Qty
+                                Order amount should be INR
                                 </label>
                                 <div className="mt-1">
-                                    <select
+                                    <Input
                                         id="niftyLotSize"
                                         name="niftyLotSize"
+                                        type="tel"
+                                        min="1000"
+                                        required
                                         className="input-field"
                                         value={niftyLotSize}
                                         onChange={handleChange}
-                                        required
-                                    >
-                                        {/* Mapping options from 1 to 10 */}
-                                        {[...Array(10)].map((_, index) => (
-                                            <option key={index + 1} value={index + 1}>
-                                                {index + 1}
-                                            </option>
-                                        ))}
-                                    </select>
+                                    />
                                 </div>
                             </div>
                         )}
@@ -462,25 +457,19 @@ export default function RegistrationPage() {
                         {formData.scrip_type.includes("BANKNIFTY") && (
                             <div>
                                 <label htmlFor="bankniftyLotSize" className="block text-sm font-medium text-gray-700">
-                                    Bank Nifty Lot Qty
+                                Order amount should be INR
                                 </label>
                                 <div className="mt-1">
-
-                                    <select
+                                <Input
                                         id="bankniftyLotSize"
                                         name="bankniftyLotSize"
+                                        type="tel"
+                                        min="1000"
+                                        required
                                         className="input-field"
                                         value={bankNiftyLotSize}
                                         onChange={handleChange}
-                                        required
-                                    >
-                                        {/* Mapping options from 1 to 10 */}
-                                        {[...Array(10)].map((_, index) => (
-                                            <option key={index + 1} value={index + 1}>
-                                                {index + 1}
-                                            </option>
-                                        ))}
-                                    </select>
+                                    />
                                 </div>
                             </div>
                         )}
