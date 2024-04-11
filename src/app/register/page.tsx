@@ -14,6 +14,7 @@ const FormDataSchema = z.object({
     last_name: z.string().min(2,"Last name must  be at least 2 characters long "),
     user_id: z.string().min(2,"User id must contain more than 2 characters"),
     user_password: z.string().min(6, "password must contain minimum 6 characters"),
+    confirm_password: z.string(),
     email_address: z.string().email(),
     phone_number: z.string(),
     client_id: z.string(),
@@ -32,6 +33,7 @@ interface FormData {
     last_name: string;
     user_id: string;
     user_password: string;
+    confirm_password: string;
     email_address: string;
     phone_number: string;
     client_id: string;
@@ -44,10 +46,6 @@ interface FormData {
     order_amount: string[];
 }
 
-interface ValidationError {
-    path: string[]; // The path to the field that failed validation
-    message: string; // The error message
-}
 
 function redirectToHomePage() {
     window.location.href = '/home';
@@ -60,6 +58,7 @@ export default function RegistrationPage() {
         last_name: "",
         user_id: "",
         user_password: "",
+        confirm_password: "",
         email_address: "",
         phone_number: "",
         client_id: "",
@@ -277,6 +276,33 @@ export default function RegistrationPage() {
                                 />
                             </div>
                         </div>
+
+
+
+                         {/* Confirm password field */}
+                         <div>
+                            <label htmlFor="confirm_password" className="block text-sm font-medium text-gray-700">
+                                Confirm Password
+                            </label>
+                            <div className="mt-1">
+                                <Input
+                                    id="confirm_password"
+                                    name="confirm_password"
+                                    type="password"
+                                    required
+                                    autoComplete="new-password"
+                                    className="input-field"
+                                    value={formData.confirm_password}
+                                    onChange={handleChange}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Error message for password mismatch */}
+                        {formData.user_password !== formData.confirm_password && (
+                            <p className="text-red-500">Passwords do not match</p>
+                        )}
+
 
                         {/* Email Address */}
                         <div>
