@@ -156,6 +156,8 @@ export default function RegistrationPage() {
                 .then((response) => {
                     console.log(response.data);
                     toast({ description: response.data.message });
+
+                    sessionStorage.setItem('user_id', validatedData.user_id);
                     sessionStorage.setItem('isAuthenticated', 'true');
                     redirectToHomePage();
                 })

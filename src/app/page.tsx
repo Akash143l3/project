@@ -42,7 +42,7 @@ export default function LoginPage() {
         resolver: zodResolver(formSchema),
         defaultValues: {
             user_id: "",
-            user_password: "",
+            user_password: ""
         },
     })
 
@@ -62,6 +62,7 @@ export default function LoginPage() {
             .then((response) => {
                 console.log(response.data);
 
+                sessionStorage.setItem('user_id', values.user_id);
                 sessionStorage.setItem('isAuthenticated', 'true');
 
                 // Redirect to the home page
