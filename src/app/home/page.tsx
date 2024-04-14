@@ -16,8 +16,8 @@ import { Label } from '@radix-ui/react-label';
 import { Button } from '@/components/ui/button';
 import { useToast } from "@/components/ui/use-toast";
 import { EllipsisVertical } from 'lucide-react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu';
-import { DropdownMenuShortcut } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu';
+
 
 interface Order {
     id: number;
@@ -171,11 +171,11 @@ export default function TableDemo() {
             return;
         }
         if (fromDate.trim() === '' || toDate.trim() === '') {
-            setError('Date is required to filter the orders.');
+            setError('Date is required to fetch the orders.');
             return;
         }
         if (scripTypeId.trim() === '') {
-            setError('Scrip Type ID is required to filter the orders.');
+            setError('Scrip Type ID is required to fetch the orders.');
             return;
         }
 
