@@ -4,7 +4,6 @@ import axios from 'axios';
 import {
     Table,
     TableBody,
-    TableCaption,
     TableCell,
     TableFooter,
     TableHead,
@@ -144,24 +143,6 @@ export default function TableDemo() {
         setScripTypeId(e.target.value);
     };
 
-    const fetchAllOrders = async () => {
-        try {
-            const allOrders = await getAllOrders(userId);
-            setOrders(allOrders);
-
-            const totalProfitLoss = allOrders.reduce((acc, order) => {
-                const profitLossValue = typeof order.profit_loss === 'string' ? parseFloat(order.profit_loss) : order.profit_loss;
-                return acc + profitLossValue;
-            }, 0);
-
-            const totalBuyPrice = allOrders.reduce((acc, order) => acc + order.buy_price * order.buy_qty, 0);
-
-            setTotalProfitLoss(totalProfitLoss);
-            setTotalBuyPrice(totalBuyPrice);
-        } catch (error) {
-            console.error('Error fetching all orders:', error);
-        }
-    };
 
     const fetchFilteredOrders = async () => {
         setError(null);
@@ -170,14 +151,7 @@ export default function TableDemo() {
             setError('User ID is required.');
             return;
         }
-        if (fromDate.trim() === '' || toDate.trim() === '') {
-            setError('Date is required to fetch the orders.');
-            return;
-        }
-        if (scripTypeId.trim() === '') {
-            setError('Scrip Type ID is required to fetch the orders.');
-            return;
-        }
+        
 
         let filteredOrders;
         if (!fromDate && !toDate && !scripTypeId) {
@@ -250,8 +224,6 @@ export default function TableDemo() {
                         className="w-full md:w-1/4"
                     />
                     <Button onClick={fetchFilteredOrders} className="md:mr-2">Fetch Orders</Button>
-                    <Button onClick={fetchAllOrders} className="mt-2 md:mt-0">All Orders</Button>
-
 
                     {error && <div className="text-red-500 pt-2">{error}</div>}
                 </div>
