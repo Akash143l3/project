@@ -24,7 +24,7 @@ const FormDataSchema = z.object({
     target_profit: z.number().min(40000),
     target_loss: z.number().min(5000),
     scrip_type: z.array(z.string()),
-    order_amount: z.array(z.string()),
+    lot_qty: z.array(z.string()),
 });
 
 
@@ -43,7 +43,7 @@ interface FormData {
     target_profit: number;
     target_loss: number;
     scrip_type: string[];// Change false to boolean
-    order_amount: string[];
+    lot_qty: string[];
 }
 
 
@@ -68,7 +68,7 @@ export default function RegistrationPage() {
         target_profit: 40000,
         target_loss: 5000,
         scrip_type: [],
-        order_amount: ["5000","5000"]
+        lot_qty: ["5000","5000"]
     });
 
     useEffect(() => {
@@ -109,17 +109,17 @@ export default function RegistrationPage() {
             const niftyLotSizeValue = value;
             setNiftyLotSize(niftyLotSizeValue);
             if (formData.scrip_type.includes("BANKNIFTY")) {
-                setFormData({ ...formData, scrip_type: ["Nifty", "BANKNIFTY"], order_amount: [niftyLotSizeValue, bankNiftyLotSize] });
+                setFormData({ ...formData, scrip_type: ["Nifty", "BANKNIFTY"], lot_qty: [niftyLotSizeValue, bankNiftyLotSize] });
             } else {
-                setFormData({ ...formData, scrip_type: ["Nifty"], order_amount: [niftyLotSizeValue] });
+                setFormData({ ...formData, scrip_type: ["Nifty"], lot_qty: [niftyLotSizeValue] });
             }
         } else if (name === "bankniftyLotSize") {
             const bankNiftyLotSizeValue = value;
             setBankNiftyLotSize(bankNiftyLotSizeValue);
             if (formData.scrip_type.includes("Nifty")) {
-                setFormData({ ...formData, scrip_type: ["Nifty", "BANKNIFTY"], order_amount: [niftyLotSize, bankNiftyLotSizeValue] });
+                setFormData({ ...formData, scrip_type: ["Nifty", "BANKNIFTY"], lot_qty: [niftyLotSize, bankNiftyLotSizeValue] });
             } else {
-                setFormData({ ...formData, scrip_type: ["BANKNIFTY"], order_amount: [bankNiftyLotSizeValue] });
+                setFormData({ ...formData, scrip_type: ["BANKNIFTY"], lot_qty: [bankNiftyLotSizeValue] });
             }
         } else if (name === "target_profit") {
             const targetProfitValue = Number(value);
@@ -152,7 +152,7 @@ export default function RegistrationPage() {
         try {
             const validatedData = FormDataSchema.parse(formData);
             axios
-                .post("http://127.0.0.1:5000/register", validatedData)
+                .post("http://91.108.110.32:5000/register", validatedData)
                 .then((response) => {
                     console.log(response.data);
                     toast({ description: response.data.message });

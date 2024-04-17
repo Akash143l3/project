@@ -42,7 +42,7 @@ function logout() {
 }
 
 async function getAllOrders(user_id: string): Promise<Order[]> {
-    const apiUrl = `http://127.0.0.1:5000/orders/user/${user_id}`;
+    const apiUrl = `http://91.108.110.32:5000/orders/user/${user_id}`;
     try {
         const response = await axios.get(apiUrl);
         return response.data;
@@ -53,7 +53,7 @@ async function getAllOrders(user_id: string): Promise<Order[]> {
 }
 
 async function getFilteredOrders(userId: string, scripTypeId: string, fromDate: string, toDate: string): Promise<Order[]> {
-    const apiUrl = `http://127.0.0.1:5000/orders/filter?user_id=${userId}&scrip_type_id=${scripTypeId}&from_date=${fromDate}&to_date=${toDate}`;
+    const apiUrl = `http://91.108.110.32:5000/orders/filter?user_id=${userId}&scrip_type_id=${scripTypeId}&from_date=${fromDate}&to_date=${toDate}`;
     try {
         const response = await axios.get(apiUrl);
         return response.data;
@@ -69,13 +69,8 @@ async function getFilteredOrders(userId: string, scripTypeId: string, fromDate: 
     }
 }
 
-const formatDate = (datetime: string): string => {
-    const date = new Date(datetime);
-    return date.toISOString().split('T')[0];
-};
 
 export default function TableDemo() {
-    const { toast } = useToast();
     const [userId, setUserId] = useState('');
     const [orders, setOrders] = useState<Order[]>([]);
     const [totalProfitLoss, setTotalProfitLoss] = useState<number>(0);
@@ -292,8 +287,7 @@ export default function TableDemo() {
                                 <TableHead>Buy Price</TableHead>
                                 <TableHead>Sell Qty</TableHead>
                                 <TableHead>Sell Price</TableHead>
-                                <TableHead>Buy DateTime</TableHead>
-                                <TableHead>Sell DateTime</TableHead>
+                        
                                 <TableHead>Profit/Loss</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -307,8 +301,7 @@ export default function TableDemo() {
                                     <TableCell>{order.buy_price}</TableCell>
                                     <TableCell>{order.sell_qty}</TableCell>
                                     <TableCell>{order.sell_price}</TableCell>
-                                    <TableCell>{formatDate(order.order_buy_datetime)}</TableCell>
-                                    <TableCell>{formatDate(order.order_sell_datatime)}</TableCell>
+                                   
                                     <TableCell>{order.profit_loss}</TableCell>
                                 </TableRow>
                             ))}

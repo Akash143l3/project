@@ -58,7 +58,7 @@ export default function LoginPage() {
 
     function handleLogin(values: z.infer<typeof formSchema>) {
         axios
-            .post('http://127.0.0.1:5000/login', values)
+            .post('http://91.108.110.32:5000/login', values)
             .then((response) => {
                 console.log(response.data);
 
@@ -91,7 +91,7 @@ export default function LoginPage() {
         };
 
         axios
-            .put('http://127.0.0.1:5000/reset-password', data)
+            .put('http://91.108.110.32:5000/reset-password', data)
             .then((response) => {
                 // Handle successful password reset
                 toast({ description: response.data.message });
