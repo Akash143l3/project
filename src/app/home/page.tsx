@@ -17,7 +17,6 @@ import { useToast } from "@/components/ui/use-toast";
 import { EllipsisVertical } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@radix-ui/react-dropdown-menu';
 
-
 interface Order {
     id: number;
     user_id: string;
@@ -42,7 +41,6 @@ function logout() {
     redirectToLogin();
 }
 
-// Function to fetch all records
 async function getAllOrders(user_id: string): Promise<Order[]> {
     const apiUrl = `http://127.0.0.1:5000/orders/user/${user_id}`;
     try {
@@ -54,8 +52,22 @@ async function getAllOrders(user_id: string): Promise<Order[]> {
     }
 }
 
-// Function to fetch filtered orders by user ID, scrip type ID, and date range
-
+async function getFilteredOrders(userId: string, scripTypeId: string, fromDate: string, toDate: string): Promise<Order[]> {
+    const apiUrl = `http://127.0.0.1:5000/orders/filter?user_id=${userId}&scrip_type_id=${scripTypeId}&from_date=${fromDate}&to_date=${toDate}`;
+    try {
+        const response = await axios.get(apiUrl);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching filtered orders:', error);
+        if (axios.isAxiosError(error) && error.response) {
+            const errorMessage = error.response.data.error || 'An unknown error occurred.';
+            useToast().toast({ description: errorMessage });
+        } else {
+            useToast().toast({ description: 'An unknown error occurred.' });
+        }
+        return [];
+    }
+}
 
 const formatDate = (datetime: string): string => {
     const date = new Date(datetime);
@@ -66,30 +78,12 @@ export default function TableDemo() {
     const { toast } = useToast();
     const [userId, setUserId] = useState('');
     const [orders, setOrders] = useState<Order[]>([]);
-    const [totalProfitLoss, setTotalProfitLoss] = useState(0);
+    const [totalProfitLoss, setTotalProfitLoss] = useState<number>(0);
     const [totalBuyPrice, setTotalBuyPrice] = useState(0);
     const [fromDate, setFromDate] = useState('');
     const [toDate, setToDate] = useState('');
     const [scripTypeId, setScripTypeId] = useState('');
     const [error, setError] = useState<string | null>(null);
-
-    async function getFilteredOrders(userId: string, scripTypeId: string, fromDate: string, toDate: string): Promise<Order[]> {
-
-        let baseUrl = `http://127.0.0.1:5000/orders/filter?user_id=${userId}&scrip_type_id=${scripTypeId}&from_date=${fromDate}&to_date=${toDate}`;
-        try {
-            const response = await axios.get(baseUrl);
-            return response.data;
-        } catch (error) {
-            console.error('Error fetching filtered orders:', error);
-            if (axios.isAxiosError(error) && error.response) {
-                const errorMessage = error.response.data.error || 'An unknown error occurred.';
-                toast({ description: errorMessage });
-            } else {
-                toast({ description: 'An unknown error occurred.' });
-            }
-            return [];
-        }
-    }
 
     useEffect(() => {
         // Check authentication status and set user ID from session storage
@@ -111,25 +105,52 @@ export default function TableDemo() {
             try {
                 const allOrders = await getAllOrders(userId);
                 setOrders(allOrders);
-
+    
+                // Calculate total profit/loss
                 const totalProfitLoss = allOrders.reduce((acc, order) => {
-                    const profitLossValue = typeof order.profit_loss === 'string' ? parseFloat(order.profit_loss) : order.profit_loss;
+                    let profitLossValue;
+    
+                    // Handle profit_loss data type (string or number)
+                    if (typeof order.profit_loss === 'string') {
+                        profitLossValue = parseFloat(order.profit_loss);
+                        if (isNaN(profitLossValue)) {
+                            // If parsing failed, set to zero and log error
+                            console.error(`Error parsing profit_loss for order ${order.id}: ${order.profit_loss}`);
+                            profitLossValue = 0;
+                        }
+                    } else {
+                        profitLossValue = order.profit_loss;
+                    }
+    
+                    // Add profit/loss to the accumulator
                     return acc + profitLossValue;
                 }, 0);
-
-                const totalBuyPrice = allOrders.reduce((acc, order) => acc + order.buy_price * order.buy_qty, 0);
-
-                setTotalProfitLoss(totalProfitLoss);
+    
+                // Ensure totalProfitLoss is a valid number
+                if (isNaN(totalProfitLoss)) {
+                    console.error('Error: totalProfitLoss is NaN');
+                    setTotalProfitLoss(0);
+                } else {
+                    setTotalProfitLoss(totalProfitLoss);
+                }
+    
+                // Calculate total buy price
+                const totalBuyPrice = allOrders.reduce((acc, order) => {
+                    // Calculate buy price for each order
+                    return acc + order.buy_price * order.buy_qty;
+                }, 0);
+                
                 setTotalBuyPrice(totalBuyPrice);
             } catch (error) {
                 console.error('Error fetching orders:', error);
             }
         };
-
+    
         if (userId) {
             fetchOrders();
         }
     }, [userId]);
+    
 
     const handleFromDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFromDate(e.target.value);
@@ -143,50 +164,78 @@ export default function TableDemo() {
         setScripTypeId(e.target.value);
     };
 
-
     const fetchFilteredOrders = async () => {
         setError(null);
-
+    
         if (!userId) {
             setError('User ID is required.');
             return;
         }
-        
-
+    
         let filteredOrders;
         if (!fromDate && !toDate && !scripTypeId) {
             filteredOrders = await getAllOrders(userId);
         } else {
             filteredOrders = await getFilteredOrders(userId, scripTypeId, fromDate, toDate);
         }
+    
+        // Check if filteredOrders is empty
+        if (!filteredOrders || filteredOrders.length === 0) {
+            console.error('No filtered orders found.');
+            setOrders([]);
+            setTotalProfitLoss(0);
+            setTotalBuyPrice(0);
+            return;
+        }
+    
         setOrders(filteredOrders);
-
+    
+        // Calculate total profit/loss considering both positive and negative profit/loss
         const totalProfitLoss = filteredOrders.reduce((acc, order) => {
-            const profitLossValue = typeof order.profit_loss === 'string' ? parseFloat(order.profit_loss) : order.profit_loss;
-            return acc + profitLossValue;
+            // Parse profit/loss if necessary
+            let profitLossValue = order.profit_loss;
+            if (typeof order.profit_loss === 'string') {
+                profitLossValue = parseFloat(order.profit_loss);
+            }
+    
+            // Add profit/loss to the accumulator
+            if (!isNaN(profitLossValue)) {
+                return acc + profitLossValue;
+            } else {
+                // Log error for invalid profit/loss value
+                console.error(`Invalid profit/loss value for order ${order.id}: ${order.profit_loss}`);
+                return acc;
+            }
         }, 0);
-
+    
+        // Ensure totalProfitLoss is a valid number
+        if (isNaN(totalProfitLoss)) {
+            console.error('Error: totalProfitLoss is NaN');
+            setTotalProfitLoss(0);
+        } else {
+            setTotalProfitLoss(totalProfitLoss);
+        }
+    
+        // Calculate total buy price
         const totalBuyPrice = filteredOrders.reduce((acc, order) => acc + order.buy_price * order.buy_qty, 0);
-
-        setTotalProfitLoss(totalProfitLoss);
         setTotalBuyPrice(totalBuyPrice);
     };
+    
 
     return (
         <div className="w-full h-full pt-10 px-4">
-            <div className='flex justify-between'><h1 className="text-lg font-semibold pb-10">Hello {userId}</h1>
-                <DropdownMenu >
+            <div className='flex justify-between'>
+                <h1 className="text-lg font-semibold pb-10">Hello {userId}</h1>
+                <DropdownMenu>
                     <DropdownMenuTrigger className='h-10 W-10 rounded-md border'>
                         <EllipsisVertical size={20} />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
-                        <DropdownMenuItem >
+                        <DropdownMenuItem>
                             <Button onClick={logout}>Logout</Button>
-
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
-
             </div>
             <div className="flex flex-col gap-6">
                 <div className="input-container flex flex-col md:flex-row gap-3 mb-8">
@@ -202,7 +251,7 @@ export default function TableDemo() {
                         />
                     </div>
                     <div className="flex flex-col md:flex-row gap-2">
-                        <Label htmlFor="toDate" className="font-semibold pt-1.5" >To Date :</Label>
+                        <Label htmlFor="toDate" className="font-semibold pt-1.5">To Date :</Label>
                         <Input
                             id="toDate"
                             type="date"
@@ -229,7 +278,6 @@ export default function TableDemo() {
                 </div>
             </div>
 
-
             {orders.length === 0 ? (
                 <div className="text-center text-lg font-semibold">No orders found</div>
             ) : (
@@ -251,7 +299,7 @@ export default function TableDemo() {
                         </TableHeader>
                         <TableBody>
                             {orders.map((order) => (
-                                <TableRow key={order.id} style={{ backgroundColor: order.profit_loss < order.buy_price ? 'pink' : 'lightgreen' }}>
+                                <TableRow key={order.id} style={{ backgroundColor: order.buy_qty * order.buy_price > order.sell_qty * order.sell_price ? 'pink' : 'lightgreen' }}>
                                     <TableCell>{order.id}</TableCell>
                                     <TableCell>{order.user_id}</TableCell>
                                     <TableCell>{order.scrip_type_id}</TableCell>
@@ -268,7 +316,7 @@ export default function TableDemo() {
                         <TableFooter>
                             <TableRow>
                                 <TableCell colSpan={9} className="text-right pr-24 font-bold text-sm">Total</TableCell>
-                                <TableCell style={{ color: totalProfitLoss < totalBuyPrice ? 'red' : 'black' }}>
+                                <TableCell style={{ color: totalProfitLoss < 0 ? 'red' : 'green' }}>
                                     {totalProfitLoss.toFixed(2)}
                                 </TableCell>
                             </TableRow>
@@ -276,8 +324,6 @@ export default function TableDemo() {
                     </Table>
                 </div>
             )}
-
-
         </div>
     );
 }
